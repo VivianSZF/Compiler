@@ -21,6 +21,8 @@ struct Node{
 
 typedef struct Node Node;
 
+Node* root;
+
 struct Node* create_node(int ntype, char* name, int lineno, char* value);
 struct Node* add_node(int ntype,char* name, int lineno,char*value, int num_of_c, ...);
 void preorderprint(struct Node* node, int cnt);

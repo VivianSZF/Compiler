@@ -34,11 +34,11 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
 }
 
 
-Node* add_node(int ntype,char* name, int lineno,char*value, int num_of_c, ...)
+Node* add_node(int ntype,char* name, int lineno, int num_of_c, ...)
 {
     va_list ap;
     va_start(ap,num_of_c);    
-    Node *newnode=create_node(ntype,name,lineno,value);
+    Node *newnode=create_node(ntype,name,lineno,NULL);
     int i;
     for(i=0;i<num_of_c;i++)
     {
@@ -84,7 +84,5 @@ void preorderprint(Node* node, int cnt)
             break;
     }
     for(j=0;j<node->childnum;j++)
-    {
         preorderprint(node->child[j],cnt+1);
-    }
 }
