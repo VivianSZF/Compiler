@@ -1,5 +1,7 @@
 %{
 #include <stdio.h>
+#include "syntax.tab.h"
+#include "treeop.h"
 %}
 
 %option yylineno
@@ -18,7 +20,7 @@ TYPE		int|float
 WS		    [ \t]+
 
 %%
-{INT}		{printf("intnum\n");}
+{INT}		{yylval.node=create_node(INT,"INT",yylineno,yytext);return INT;}
 {FLOAT}		{printf("floatnum\n");}
 ";"		    {printf("sem\n");}
 ","		    {printf("comma\n");}

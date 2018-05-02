@@ -1,7 +1,7 @@
 //#ifndef __TREEOP_H__
 //#define __TREEOP_H__
 
-enum{ID,TYPE,INT,FLOAT,UN,TOKEN};
+enum{TID,TTYPE,TINT,TFLOAT,TUN,TTOKEN};
 #define type_int 0
 #define type_float 1
 
