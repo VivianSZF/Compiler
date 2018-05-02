@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include "treeop.h"
 #include <string.h>
+#include <stdarg.h>
+
+Node* root=NULL;
+int errornot=0;
 
 Node* create_node(int ntype, char* name, int lineno, char* value)
 {
@@ -13,18 +17,19 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
     newnode->childnum=0;
     newnode->child=malloc(sizeof(struct Node*));
     switch(ntype){
-        case ID:
+        case TID:
             newnode->id_name=malloc(sizeof(char)*(strlen(value)+1));
+            strcpy(newnode->id_name,value);
             break;
-        case TYPE:
+        case TTYPE:
             if(strcmp(value,"int")==0)
                 newnode->type=type_int;
             else newnode->type=type_float;
             break;
-        case INT:
+        case TINT:
             newnode->int_value=atoi(value);
             break;
-        case FLOAT:
+        case TFLOAT:
             newnode->float_value=(float)atof(value);
             break;
         default:
@@ -42,8 +47,8 @@ Node* add_node(int ntype,char* name, int lineno, int num_of_c, ...)
     int i;
     for(i=0;i<num_of_c;i++)
     {
-        Node* child;
-        child=va_arg(ap, Node*);
+        struct Node* child;
+        child=va_arg(ap,struct Node*);
         if (newnode->childnum>0)
         {    
             void *p=realloc(newnode->child,(sizeof(struct Node*)*(newnode->childnum+1)));
@@ -62,25 +67,28 @@ void preorderprint(Node* node, int cnt)
     if(node==NULL) return;
     int i,j;
     for(i=0;i<cnt*2;i++) printf(" ");
-    printf("%s: ",node->name);
+    printf("%s",node->name);
     switch(node->ntype){
-        case ID:
-            printf("%s",node->id_name);
+        case TID:
+            printf(": %s\n",node->id_name);
             break;
-        case TYPE:
+        case TTYPE:
             if(node->type==type_int)
-                printf("INT");
+                printf(": int\n");
             else
-                printf("FLOAT");
+                printf(": float\n");
             break;
-        case INT:
-            printf("%d",node->int_value);
+        case TINT:
+            printf(": %d\n",node->int_value);
             break;
-        case FLOAT:
-            printf("%f",node->float_value);
+        case TFLOAT:
+            printf(": %f\n",node->float_value);
             break;
-        case TOKEN:
-            printf("(%d)",node->lineno);
+        case TTOKEN:
+            printf(" (%d)\n",node->lineno);
+            break;
+        default:
+            printf("\n");
             break;
     }
     for(j=0;j<node->childnum;j++)

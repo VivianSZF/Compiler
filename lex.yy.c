@@ -549,7 +549,7 @@ char *yytext;
 #include "treeop.h"
 
 int yycolumn=1;
-#define YY_USER_ACTION
+#define YY_USER_ACTION \
     yylloc.first_line=yylloc.last_line=yylineno; \
     yylloc.first_column=yycolumn; \
     yylloc.last_column=yycolumn+yyleng-1; \
@@ -952,7 +952,7 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 #line 54 "lexical.l"
-{yylval.node=create_node(TUN,"RETURN",yylineno,NULL);return RETURE;}
+{yylval.node=create_node(TUN,"RETURN",yylineno,NULL);return RETURN;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
@@ -1000,15 +1000,16 @@ case 32:
 YY_RULE_SETUP
 #line 63 "lexical.l"
 {
-		    printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);
+            errornot=1;
+   		    printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);
 		}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 66 "lexical.l"
+#line 67 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 1012 "lex.yy.c"
+#line 1013 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2015,7 +2016,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 65 "lexical.l"
+#line 66 "lexical.l"
 
 
 

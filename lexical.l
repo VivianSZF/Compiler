@@ -4,7 +4,7 @@
 #include "treeop.h"
 
 int yycolumn=1;
-#define YY_USER_ACTION
+#define YY_USER_ACTION \
     yylloc.first_line=yylloc.last_line=yylineno; \
     yylloc.first_column=yycolumn; \
     yylloc.last_column=yycolumn+yyleng-1; \
@@ -51,7 +51,7 @@ WS		    [ \t]+
 "{"		    {yylval.node=create_node(TUN,"LC",yylineno,NULL);return LC;}
 "}"		    {yylval.node=create_node(TUN,"RC",yylineno,NULL);return RC;}
 "struct"	{yylval.node=create_node(TUN,"STRUCT",yylineno,NULL);return STRUCT;}
-"return"	{yylval.node=create_node(TUN,"RETURN",yylineno,NULL);return RETURE;}
+"return"	{yylval.node=create_node(TUN,"RETURN",yylineno,NULL);return RETURN;}
 "if"		{yylval.node=create_node(TUN,"IF",yylineno,NULL);return IF;}
 "else"		{yylval.node=create_node(TUN,"ELSE",yylineno,NULL);return ELSE;}
 "while"		{yylval.node=create_node(TUN,"WHILE",yylineno,NULL);return WHILE;}
@@ -61,6 +61,7 @@ WS		    [ \t]+
 {LINECOMMENT}	{;}
 {BLOCKCOMMENT}	{printf("block comment\n");}
 .		{
-		    printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);
+            errornot=1;
+   		    printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);
 		}
 %%

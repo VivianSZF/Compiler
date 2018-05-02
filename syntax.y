@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "lex.yy.c"
 #include "treeop.h"
+
+void yyerror(char* msg);
 %}
 
 %union{
@@ -33,12 +35,12 @@ Program: ExtDefList     {$$=add_node(TTOKEN, "Program", @$.first_line, 1, $1);ro
     ;
 
 ExtDefList: ExtDef ExtDefList   {$$=add_node(TTOKEN, "ExtDefList", @$.first_line, 2, $1,$2);}
-            |                   {$$=NULL}
+            |                   {$$=NULL;}
     ;
 
 ExtDef: Specifier ExtDecList SEMI   {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
     | Specifier SEMI  {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 2,$1,$2);}
-    | Specifier FunDec CompSt {$$=add_node(TTOKEN, "ExtDef", @$first_line, 3,$1,$2,$3);}
+    | Specifier FunDec CompSt {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
     ;
 
 ExtDecList: VarDec  {$$=add_node(TTOKEN, "ExtDecList", @$.first_line,1,$1);}
@@ -130,7 +132,10 @@ Args: Exp COMMA Args    {$$=add_node(TTOKEN,"Args", @$.first_line, 3, $1,$2,$3);
 
 %%
 
-
+void yyerror(char* msg){
+    errornot=1;    
+    fprintf(stderr, "Error Type B at Line %d: %s\n", yylineno, msg);
+}
 
 
 

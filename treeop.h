@@ -1,5 +1,5 @@
-//#ifndef __TREEOP_H__
-//#define __TREEOP_H__
+#ifndef __TREEOP_H__
+#define __TREEOP_H__
 
 enum{TID,TTYPE,TINT,TFLOAT,TUN,TTOKEN};
 #define type_int 0
@@ -21,8 +21,12 @@ struct Node{
 
 typedef struct Node Node;
 
-Node* root;
+extern Node* root;
 
-struct Node* create_node(int ntype, char* name, int lineno, char* value);
-struct Node* add_node(int ntype,char* name, int lineno,char*value, int num_of_c, ...);
-void preorderprint(struct Node* node, int cnt);
+extern int errornot;
+
+extern struct Node* create_node(int ntype, char* name, int lineno, char* value);
+extern struct Node* add_node(int ntype,char* name, int lineno, int num_of_c, ...);
+extern void preorderprint(struct Node* node, int cnt);
+
+#endif
