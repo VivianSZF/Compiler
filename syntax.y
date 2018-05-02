@@ -15,6 +15,16 @@
 %type <node> StructSpecifier OptTag Tag FunDec VarList ParamDec CompSt StmtList Stmt
 %type <node> Exp DefList Def DecList Dec Args
 
+%right ASSIGNOP
+%left PLUS MINUS
+%left STAR DIV
+%left LP RP LB RB
+%left OR
+%left AND
+%left DOT
+%right NOT
+%left RELOP
+
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
