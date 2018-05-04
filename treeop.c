@@ -7,6 +7,55 @@
 Node* root=NULL;
 int errornot=0;
 
+int hextodec(char* value)
+{
+    int t,len,i;
+    len = strlen(value);
+    long long sum=0;
+    for(i=2;i<len;i++){
+        if(value[i]<='9')
+            t=value[i]-'0';
+        else
+            t=value[i]-'A'+10;
+        sum=sum*16+t;
+    }    
+    return sum;
+}
+
+int octtodec(char* value)
+{
+    int t,len,i;
+    len = strlen(value);
+    long long sum=0;
+    for(i=1;i<len;i++){
+        t=value[i]-'0';
+        sum=sum*8+t;
+    }    
+    return sum;    
+}
+
+int hexornot(char* value)
+{
+    int len,i;
+    len=strlen(value);
+    for(i=2;i<len;i++){
+        if((value[i]>'F'&&value[i]<='Z')||(value[i]>'f'&&value[i]<='z'))
+            return 1;
+    }
+    return 0;
+}
+
+int octornot(char* value)
+{
+    int len,i;
+    len=strlen(value);
+    for(i=1;i<len;i++){
+        if(value[i]>'7')
+            return 1;
+    }
+    return 0;
+}
+
 Node* create_node(int ntype, char* name, int lineno, char* value)
 {
     Node *newnode=malloc(sizeof(struct Node));
@@ -27,7 +76,32 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
             else newnode->type=type_float;
             break;
         case TINT:
-            newnode->int_value=atoi(value);
+            if(strlen(value)>1){
+                if(value[0]=='0'&&(value[1]=='x'||value[1]=='X')){
+                    int k;
+                    k=hexornot(value);
+                    if(k==1){
+                        errornot=1;
+                        printf("Error type A at Line %d: Illegal hexadecimal number \'%s\'.\n", lineno, value);
+                    }
+                    else
+                        newnode->int_value=hextodec(value);
+                }
+                else if(value[0]=='0'){
+                    int k;
+                    k=octornot(value);
+                    if(k==1){
+                        errornot=1;
+                        printf("Error type A at Line %d: Illegal octal number \'%s\'.\n", lineno, value);
+                    }
+                    else
+                        newnode->int_value=octtodec(value);
+                }               
+                else
+                    newnode->int_value=atoi(value);
+            }
+            else     
+                newnode->int_value=atoi(value);
             break;
         case TFLOAT:
             newnode->float_value=(float)atof(value);

@@ -74,7 +74,8 @@ extern int yydebug;
     WHILE = 284,
     LOWER_THAN_ELSE = 285,
     LOWER_THAN_SEMI = 286,
-    LOWER_THAN_RC = 287
+    LOWER_THAN_RC = 287,
+    LOWER_THAN_RB = 288
   };
 #endif
 
@@ -87,7 +88,7 @@ union YYSTYPE
 
     struct Node* node;
 
-#line 91 "syntax.tab.h" /* yacc.c:1909  */
+#line 92 "syntax.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

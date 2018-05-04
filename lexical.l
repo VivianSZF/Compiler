@@ -15,9 +15,9 @@ int yycolumn=1;
 
 %option yylineno
 DEC		    0|([1-9][0-9]*)
-OCT		    0[0-7]+
-HEX		    0[xX][0-9a-fA-F]+
-INT		    {DEC}|{OCT}|{HEX}
+WOCT		    0[0-9]+
+WHEX		    0[xX][0-9a-zA-Z]+
+INT		    {DEC}|{WOCT}|{WHEX}
 nfloat		[0-9]+\.[0-9]+
 sfloat		(([0-9]*\.[0-9]+)|([0-9]+\.))[eE][+-]?[0-9]+
 FLOAT		{nfloat}|{sfloat}
@@ -62,6 +62,6 @@ WS		    [ \t]+
 {BLOCKCOMMENT}	{printf("block comment\n");}
 .		{
             errornot=1;
-   		    printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno,yytext);
+   		    printf("Error type A at Line %d: Mysterious characters \"%s\".\n",yylineno,yytext);
 		}
 %%

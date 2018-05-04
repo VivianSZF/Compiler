@@ -33,7 +33,7 @@ int errorlineno;
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 %nonassoc LOWER_THAN_SEMI
-%nonassoc LOWER_THAN_RC
+%nonassoc LOWER_THAN_RC LOWER_THAN_RB
 %nonassoc SEMI RC
 
 %%
@@ -143,7 +143,7 @@ Exp: Exp ASSIGNOP Exp   {$$=add_node(TTOKEN,"Exp", @$.first_line, 3, $1,$2,$3);}
    | FLOAT  {$$=add_node(TTOKEN,"Exp", @$.first_line, 1, $1);}
    | ID LP Args error RP {printerror("Syntax error before \")\".", errorlineno);}
    | ID LP error RP {printerror("Syntax error before \")\".", errorlineno);}
-   | Exp LB Exp error RB    {printerror("Syntax error before \"]\".", errorlineno);}
+   | Exp LB Exp error RB   {printerror("Syntax error before \";\".Probably missing \"]\".", errorlineno);}
    | LP Exp error RP    {printerror("Syntax error before \")\".", errorlineno);}
    ;
 
