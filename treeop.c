@@ -56,6 +56,15 @@ int octornot(char* value)
     return 0;
 }
 
+int floatornot(char* value)
+{
+    int len;
+    len=strlen(value);
+    if(value[len-1]=='e')
+        return 1;
+    return 0;
+}
+
 Node* create_node(int ntype, char* name, int lineno, char* value)
 {
     Node *newnode=malloc(sizeof(struct Node));
@@ -104,7 +113,12 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
                 newnode->int_value=atoi(value);
             break;
         case TFLOAT:
-            newnode->float_value=(float)atof(value);
+            if (floatornot(value)==0)
+                newnode->float_value=(float)atof(value);
+            else{
+                errornot=1;
+                printf("Error type A at Line %d: Illegal floating point number \'%s\'.\n", lineno, value);
+            }
             break;
         default:
             break;

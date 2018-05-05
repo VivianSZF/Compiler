@@ -20,7 +20,8 @@ WHEX		    0[xX][0-9a-zA-Z]+
 INT		    {DEC}|{WOCT}|{WHEX}
 nfloat		[0-9]+\.[0-9]+
 sfloat		(([0-9]*\.[0-9]+)|([0-9]+\.))[eE][+-]?[0-9]+
-FLOAT		{nfloat}|{sfloat}
+wfloat      (([0-9]*\.[0-9]+)|([0-9]+\.))[eE]
+FLOAT		{nfloat}|{sfloat}|{wfloat}
 ID		    [_a-zA-Z][_a-zA-Z0-9]*
 RELOP		">"|"<"|">="|"<="|"=="|"!="
 LINECOMMENT	\/\/.*\n
