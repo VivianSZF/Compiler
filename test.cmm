@@ -1,5 +1,12 @@
 int main()
 {
-    float i = 1.05e;
+    // line comment
+    /*
+    int
+    /*
+    block comment
+    */
+    */*/
+    int i = 1;
 }
 

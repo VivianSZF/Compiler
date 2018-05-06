@@ -15,8 +15,8 @@ int yycolumn=1;
 
 %option yylineno
 DEC		    0|([1-9][0-9]*)
-WOCT		    0[0-9]+
-WHEX		    0[xX][0-9a-zA-Z]+
+WOCT		0[0-9]+
+WHEX		0[xX][0-9a-zA-Z]+
 INT		    {DEC}|{WOCT}|{WHEX}
 nfloat		[0-9]+\.[0-9]+
 sfloat		(([0-9]*\.[0-9]+)|([0-9]+\.))[eE][+-]?[0-9]+
@@ -25,7 +25,8 @@ FLOAT		{nfloat}|{sfloat}|{wfloat}
 ID		    [_a-zA-Z][_a-zA-Z0-9]*
 RELOP		">"|"<"|">="|"<="|"=="|"!="
 LINECOMMENT	\/\/.*\n
-BLOCKCOMMENT	\/\*
+BLOCKCOMMENT    \/\*(([^\*]*(\*[^\/])?)*)\*\/
+WBLOCKCOMMENT   (\/\*(([^\*]*(\*[^\/])?)*))\*\/((([^\*]*(\*[^\/])?)*)\*\/)*
 TYPE		int|float
 WS		    [ \t]+
 
@@ -60,7 +61,8 @@ WS		    [ \t]+
 \n		    {yycolumn=1;}
 {WS}		{;}
 {LINECOMMENT}	{;}
-{BLOCKCOMMENT}	{printf("block comment\n");}
+{BLOCKCOMMENT}	{;}
+{WBLOCKCOMMENT} {errornot=1;printf("Error type A at Line %d: Illegal block comment.\n",yylineno);}
 .		{
             errornot=1;
    		    printf("Error type A at Line %d: Mysterious characters \"%s\".\n",yylineno,yytext);

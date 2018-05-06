@@ -74,6 +74,7 @@ Tag: ID {$$=add_node(TTOKEN,"Tag", @$.first_line, 1, $1);}
 VarDec: ID  {$$=add_node(TTOKEN,"VarDec", @$.first_line, 1, $1);}
       | VarDec LB INT RB    {$$=add_node(TTOKEN,"VarDec", @$.first_line, 4, $1,$2,$3,$4);}
       | VarDec LB INT error RB  {printerror("Syntax error before \"]\".", errorlineno);}
+      | VarDec LB error RB  {printerror("Syntax error between \"[\" and \"]\".", errorlineno);}
       ;
 
 FunDec: ID LP VarList RP    {$$=add_node(TTOKEN,"FunDec", @$.first_line, 4, $1,$2,$3,$4);}
@@ -88,8 +89,8 @@ ParamDec: Specifier VarDec  {$$=add_node(TTOKEN,"ParamDec", @$.first_line, 2, $1
         ;
 
 CompSt: LC DefList StmtList RC  {$$=add_node(TTOKEN,"CompSt", @$.first_line, 4, $1,$2,$3,$4);}
-      | error %prec LOWER_THAN_RC {printerror("Missing \"}\".", errorlineno);}
-      | error RC{printerror("Syntax error between \"{\" and \"}\".", errorlineno);}
+      | LC error RC {printerror("Syntax error between \"{\" and \"}\".", errorlineno);}
+      | LC error %prec LOWER_THAN_RC {printerror("Missing \"}\".", errorlineno);}
       ;
 
 StmtList: Stmt StmtList {$$=add_node(TTOKEN,"StmtList", @$.first_line, 2, $1,$2);}
@@ -162,10 +163,6 @@ void yyerror(char* msg){
 void printerror(char* msg, int lineno){
     printf("Error Type B at Line %d: %s\n", lineno, msg);
 }
-
-
-
-
 
 
 
