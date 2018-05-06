@@ -3,10 +3,8 @@ int main()
     // line comment
     /*
     int
-    /*
     block comment
     */
-    */*/
     int i = 1;
 }
 
