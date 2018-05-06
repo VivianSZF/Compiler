@@ -5,7 +5,7 @@
 
 void yyerror(char* msg);
 void printerror(char* msg, int lineno);
-int errorlineno;
+int errorlineno=-1;
 int mark=-1;
 
 %}
