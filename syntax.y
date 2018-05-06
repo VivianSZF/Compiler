@@ -6,6 +6,7 @@
 void yyerror(char* msg);
 void printerror(char* msg, int lineno);
 int errorlineno;
+int mark=-1;
 
 %}
 
@@ -47,9 +48,20 @@ ExtDefList: ExtDef ExtDefList   {$$=add_node(TTOKEN, "ExtDefList", @$.first_line
 ExtDef: Specifier ExtDecList SEMI   {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
     | Specifier SEMI  {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 2,$1,$2);}
     | Specifier FunDec CompSt {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
-    | Specifier ExtDecList error SEMI {printerror("Syntax error before \";\".", errorlineno);}
-    | Specifier error %prec LOWER_THAN_SEMI {printerror("Probably missing \";\".", errorlineno);}
-    | Specifier error SEMI  {printerror("Syntax error before \";\".", errorlineno);}
+	| Specifier ExtDecList error %prec LOWER_THAN_SEMI	{printerror("Missing \";\".", errorlineno-1);}
+    | Specifier ExtDecList error SEMI {
+		if(mark!=errorlineno){ 
+			printerror("Syntax error before \";\".", errorlineno);mark=errorlineno;
+		}
+	 }
+    | Specifier error %prec LOWER_THAN_SEMI {
+		if(mark!=errorlineno){
+			printerror("Missing \";\".", errorlineno-1);mark=errorlineno;}
+	 }
+    | Specifier error SEMI  {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \";\".", errorlineno);mark=errorlineno;}
+	 }
     ;
 
 ExtDecList: VarDec  {$$=add_node(TTOKEN, "ExtDecList", @$.first_line,1,$1);}
@@ -62,6 +74,11 @@ Specifier: TYPE {$$=add_node(TTOKEN, "Specifier", @$.first_line,1,$1);}
 
 StructSpecifier: STRUCT OptTag LC DefList RC {$$=add_node(TTOKEN,"StructSpecifier",@$.first_line,5,$1,$2,$3,$4,$5);}
     | STRUCT Tag    {$$=add_node(TTOKEN,"StructSpecifier",@$.first_line,2,$1,$2);}
+	| STRUCT OptTag LC DefList error	{
+		if(mark!=errorlineno){
+			printerror("Missing \"}\".", errorlineno-1);mark=errorlineno;
+		}
+	 }
     ;
 
 OptTag: ID  {$$=add_node(TTOKEN,"OptTag", @$.first_line, 1, $1);}
@@ -73,13 +90,22 @@ Tag: ID {$$=add_node(TTOKEN,"Tag", @$.first_line, 1, $1);}
 
 VarDec: ID  {$$=add_node(TTOKEN,"VarDec", @$.first_line, 1, $1);}
       | VarDec LB INT RB    {$$=add_node(TTOKEN,"VarDec", @$.first_line, 4, $1,$2,$3,$4);}
-      | VarDec LB INT error RB  {printerror("Syntax error before \"]\".", errorlineno);}
-      | VarDec LB error RB  {printerror("Syntax error between \"[\" and \"]\".", errorlineno);}
+      | VarDec LB INT error RB  {
+			if(mark!=errorlineno){
+				printerror("Syntax error before \"]\".", errorlineno);mark=errorlineno;}
+		}
+      | VarDec LB error RB  {
+			if(mark!=errorlineno){
+				printerror("Syntax error between \"[\" and \"]\".", errorlineno);mark=errorlineno;}
+		}
       ;
 
 FunDec: ID LP VarList RP    {$$=add_node(TTOKEN,"FunDec", @$.first_line, 4, $1,$2,$3,$4);}
       | ID LP RP    {$$=add_node(TTOKEN,"FunDec", @$.first_line, 3, $1,$2,$3);}
-      | ID LP error RP  {printerror("Syntax error between \"(\" and \")\".", errorlineno);}
+      | ID LP error RP  {
+			if(mark!=errorlineno){
+				printerror("Syntax error between \"(\" and \")\".", errorlineno);mark=errorlineno;}
+		}
       ;
 VarList: ParamDec COMMA VarList {$$=add_node(TTOKEN,"VarList", @$.first_line, 3, $1,$2,$3);}
        | ParamDec   {$$=add_node(TTOKEN,"VarList", @$.first_line, 1, $1);}
@@ -89,8 +115,14 @@ ParamDec: Specifier VarDec  {$$=add_node(TTOKEN,"ParamDec", @$.first_line, 2, $1
         ;
 
 CompSt: LC DefList StmtList RC  {$$=add_node(TTOKEN,"CompSt", @$.first_line, 4, $1,$2,$3,$4);}
-      | LC error RC {printerror("Syntax error between \"{\" and \"}\".", errorlineno);}
-      | LC error %prec LOWER_THAN_RC {printerror("Missing \"}\".", errorlineno);}
+      | LC error RC {
+			if(mark!=errorlineno){
+				printerror("Syntax error between \"{\" and \"}\".", errorlineno);mark=errorlineno;}
+		}
+      | LC error %prec LOWER_THAN_RC {
+			if(mark!=errorlineno){
+				printerror("Missing \"}\".", errorlineno);mark=errorlineno;}
+		}
       ;
 
 StmtList: Stmt StmtList {$$=add_node(TTOKEN,"StmtList", @$.first_line, 2, $1,$2);}
@@ -103,8 +135,22 @@ Stmt: Exp SEMI  {$$=add_node(TTOKEN,"Stmt", @$.first_line, 2, $1,$2);}
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE   {$$=add_node(TTOKEN,"Stmt", @$.first_line, 5, $1,$2,$3,$4,$5);}
     | IF LP Exp RP Stmt ELSE Stmt   {$$=add_node(TTOKEN,"Stmt", @$.first_line, 7, $1,$2,$3,$4,$5,$6,$7);}
     | WHILE LP Exp RP Stmt  {$$=add_node(TTOKEN, "Stmt", @$.first_line, 5, $1,$2,$3,$4,$5);}
-    | error SEMI    {printerror("Syntax error before \";\".", errorlineno);}
-    | error RP  {printerror("Syntax error before \")\".", errorlineno);}
+	| Exp error	{
+		if(mark!=errorlineno){
+			printerror("Missing \";\".", errorlineno);mark=errorlineno;}
+		}
+	| RETURN Exp error	{
+		if(mark!=errorlineno){
+			printerror("Missing \";\".", errorlineno);mark=errorlineno;}
+		}
+    | error SEMI    {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \";\".", errorlineno);mark=errorlineno;}
+		}
+    | error RP  {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \")\".", errorlineno);mark=errorlineno;}
+		}
     ;
 
 DefList: Def DefList    {$$=add_node(TTOKEN,"DefList", @$.first_line, 2, $1,$2);}
@@ -112,8 +158,14 @@ DefList: Def DefList    {$$=add_node(TTOKEN,"DefList", @$.first_line, 2, $1,$2);
        ;
 
 Def: Specifier DecList SEMI {$$=add_node(TTOKEN,"Def", @$.first_line, 3, $1,$2,$3);}
-   | Specifier DecList error %prec LOWER_THAN_SEMI {printerror("Missing \";\".", errorlineno);}
-   | Specifier DecList error SEMI   {printerror("Syntax error before \";\".", errorlineno);}
+   | Specifier DecList error %prec LOWER_THAN_SEMI {
+		if(mark!=errorlineno){
+			printerror("Probably missing \";\".", errorlineno-1);mark=errorlineno;}
+	}
+   | Specifier DecList error SEMI   {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \";\".", errorlineno);mark=errorlineno;}
+	}
    ;
 
 DecList: Dec    {$$=add_node(TTOKEN,"DecList", @$.first_line, 1, $1);}
@@ -142,10 +194,22 @@ Exp: Exp ASSIGNOP Exp   {$$=add_node(TTOKEN,"Exp", @$.first_line, 3, $1,$2,$3);}
    | ID     {$$=add_node(TTOKEN,"Exp", @$.first_line, 1, $1);}
    | INT    {$$=add_node(TTOKEN,"Exp", @$.first_line, 1, $1);}
    | FLOAT  {$$=add_node(TTOKEN,"Exp", @$.first_line, 1, $1);}
-   | ID LP Args error RP {printerror("Syntax error before \")\".", errorlineno);}
-   | ID LP error RP {printerror("Syntax error before \")\".", errorlineno);}
-   | Exp LB Exp error RB   {printerror("Syntax error before \";\".Probably missing \"]\".", errorlineno);}
-   | LP Exp error RP    {printerror("Syntax error before \")\".", errorlineno);}
+   | ID LP Args error RP {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \")\".", errorlineno);mark=errorlineno;}
+		}
+   | ID LP error RP {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \")\".", errorlineno);mark=errorlineno;}
+		}
+   | Exp LB Exp error  {
+		if(mark!=errorlineno){
+			printerror("Missing \"]\".", errorlineno);mark=errorlineno;}	
+		}
+   | LP Exp error RP    {
+		if(mark!=errorlineno){
+			printerror("Syntax error before \")\".", errorlineno);mark=errorlineno;}
+		}
    ;
 
 Args: Exp COMMA Args    {$$=add_node(TTOKEN,"Args", @$.first_line, 3, $1,$2,$3);}
@@ -153,6 +217,7 @@ Args: Exp COMMA Args    {$$=add_node(TTOKEN,"Args", @$.first_line, 3, $1,$2,$3);
     ;
 
 %%
+
 
 void yyerror(char* msg){
     errornot=1;  
