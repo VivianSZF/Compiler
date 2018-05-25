@@ -3,15 +3,17 @@
 
 typedef struct Type Type;
 typedef struct FieldList FieldList;
-typedef struct Symboltable Symboltable;
+typedef struct Symbolele Symbolele;
 typedef struct Args Args;
 typedef struct Func Func;
-typedef struct Symbolele Symboele;
+typedef struct Symbolt Symbolt;
 typedef struct Stack Stack;
+
+enum {SVAR,SARRAY,SSTRUCT};
 
 struct Type_
 {
-	enum{TINT,TFLOAT,TARRAY,TSTRUCTURE}kind;
+	enum{TINT,TFLOAT,TARRAY,TSTRUCT}kind;
 	union
 	{
 		struct Array
@@ -25,8 +27,7 @@ struct Type_
 
 struct FieldList_
 {
-	char* name;
-	Type *type;
+	Symbolele *s;
 	FieldList *next;
 };
 
@@ -37,12 +38,12 @@ struct Func
 	int cnt;
 	struct Args
 	{
-		Symboltable *a;
+		Symbolele *a;
 		Args *next;
 	}*args;
 };
 
-struct Symboltable
+struct Symbolele
 {
 	char *name;
 	int funcornot;
@@ -53,19 +54,22 @@ struct Symboltable
 	};
 };
 
-struct Symbolele
+struct Symbolt
 {
-	Symboltable *s;
+	Symbolele *s;
 	Stack *stack;
-	Symbolele *hash_pre;
-	Symbolele *hash_next;
-	Symbolele *stack_next;
+	Symbolt *hash_pre;
+	Symbolt *hash_next;
+	Symbolt *stack_next;
 };
 
 struct Stack
 {
-	Symboele *ele;
+	Symbolt *firstele;
 	Stack *next;
 };
+
+Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno);
+Symbolele* symbol_for_func(Func *func, char *name, int lineno);
 
 #endif
