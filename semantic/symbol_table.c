@@ -152,8 +152,8 @@ void insertVarToStack(Symbolele *symbol, Stack *stack)
 		insertToStack(symbol,stack);
 	}
 	else{
-		//error
-		printf("eeeee\n");
+		//error 3
+		printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
 	}
 }
 
@@ -164,8 +164,8 @@ void insertStructToStack(Symbolele *symbol, Stack *stack)
 		insertToStack(symbol,stack);
 	}
 	else{
-		//error
-		printf("eeeeee\n");
+		//error 16
+		printf("Error type 16 at Line %d: Duplicated name \"%s\".\n",symbol->lineno,symbol->name);
 	}
 }
 

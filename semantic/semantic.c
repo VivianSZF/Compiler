@@ -177,8 +177,8 @@ Type* StructSpecifier_analysis(Node *s)
 			symbol=hash_search(name);
 			if(symbol==NULL){ 
 				type=NULL;
-				//error
-				printf("eeee\n");
+				//error 17
+				printf("Error type 17 at Line %d: Undefined structure \"%s\".\n",s->lineno,s->child[1]->id_name);
 			}
 			else type=symbol->type;	
 			break;
@@ -241,8 +241,8 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 		}
 		else if(symbolold->funcornot==1){
 			if(symbolold->func->defordec==VDEF){
-				//error  redefined function
-				printf("eeeee\n");
+				//error 4
+				printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 			}
 			else{
 				Args *ar1,*ar2;
@@ -256,15 +256,15 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 				}
 				if(ar1==NULL && ar2==NULL) pan=1;
 				if(pan==0){
-					//error inconsistent func def
-					printf("eeeee\n");
+					//error 19
+					printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
 				}
 				symbolold->func->defordec=VDEF;
 			}
 		}
 		else{
-			//error redefined func				
-			printf("eeeeee\n");
+			//error 4				
+			printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 		}
 	}
 	else{
@@ -284,13 +284,13 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 			}
 			if(ar1==NULL && ar2==NULL) pan=1;
 			if(pan==0){
-				//error inconsistent func def
-				printf("eeeee\n");
+				//error 19
+				printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
 			}		
 		}
 		else{
-			//error redefined func
-			printf("eeeee\n");
+			//error 4
+			printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 		}
 	}
 	return func;
@@ -373,15 +373,15 @@ void Stmt_analysis(Node *s,Type *type)
 		case VRETURN:
 			type1=Exp_analysis(s->child[1])->type;
 			if(type_equiv_detect(type,type1)==0){
-				//error
-				printf("eeeeee\n");
+				//error 8
+				printf("Error type 8 at Line %d: Type mismatched for return.\n", s->lineno);
 			}
 			break;
 		case VIF:
 			type1=Exp_analysis(s->child[2])->type;
 			if(type1->kind!=VTINT){
-				//error
-				printf("eeeeee\n");
+				//error 7
+				printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
 			}
 			Stmt_analysis(s->child[4],type);
 			if(s->childnum==7){
@@ -391,8 +391,8 @@ void Stmt_analysis(Node *s,Type *type)
 		case VWHILE:
 			type1=Exp_analysis(s->child[2])->type;
 			if(type1->kind!=VTINT){
-				//error
-				printf("eeeeee\n");
+				//error 7
+				printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
 			}
 			Stmt_analysis(s->child[4],type);
 			break;
@@ -467,25 +467,24 @@ Exp* Exp_analysis(Node *s)
 	Args *ar1;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
-			printf("here1\n");
 			expl=Exp_analysis(s->child[0]);
 			switch(namemap(s->child[1]->name)){
 				case VASSIGNOP:
 					if(expl->lorr==VR){
-						//error
+						//error 6
 						exp->type=NULL;
-						printf("eeeee1\n");
+						printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n", s->lineno);
 					}
 					else{
 						expr=Exp_analysis(s->child[2]);
 						if(type_equiv_detect(expl->type,expr->type)==0){
-							//error
+							//error 5
 							exp->type==NULL;
-							printf("eeeeee\n");
+							printf("Error type 5 at Line %d: Type mismatched for assignment.\n",s->lineno);
 						}
 						else{
 							exp->type=expl->type;
-							exp->lorr=VR;//????
+							exp->lorr=VR;
 						}
 					}
 					break;
@@ -493,8 +492,8 @@ Exp* Exp_analysis(Node *s)
 				case VOR:
 					expr=Exp_analysis(s->child[2]);
 					if(expl->type->kind!=VTINT||expr->type->kind!=VTINT){
-						//error
-						printf("eeee\n");
+						//error 7
+						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
@@ -509,8 +508,8 @@ Exp* Exp_analysis(Node *s)
 				case VDIV:
 					expr=Exp_analysis(s->child[2]);
 					if((!(expl->type->kind==VTINT||expl->type->kind==VTFLOAT))||(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT))){
-						//error
-						printf("eeee\n");
+						//error 7
+						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
@@ -521,13 +520,13 @@ Exp* Exp_analysis(Node *s)
 				case VLB:
 					expr=Exp_analysis(s->child[2]);
 					if(expl->type->kind!=VTARRAY){
-						//error
-						printf("eeeee\n");
+						//error 10
+						printf("Error type 10 at Line %d: \"%s\" is not an array\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(expr->type->kind!=VTINT){
-						//error
-						printf("eeeee\n");
+						//error 12
+						printf("Error type 12 at Line %d: \"%f\" is not an integer.\n",s->lineno,s->child[2]->float_value);
 						exp->type=NULL;
 					}
 					else{
@@ -537,15 +536,15 @@ Exp* Exp_analysis(Node *s)
 					break;
 				case VDOT:
 					if(expl->type->kind!=VTSTRUCT){
-						//error
-						printf("eeeee\n");
+						//error 13
+						printf("Error type 13 at Line %d: Illegal use of \".\".\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
 						FieldList *fi=field_search(s->child[2]->id_name,expl->type);
 						if(fi==NULL){
-							//error
-							printf("eeeeee\n");
+							//error 14
+							printf("Error type 14 at Line %d: Non-existent field \"%s\"\n",s->lineno,s->child[2]->id_name);
 							exp->type=NULL;
 						}
 						else{
@@ -565,8 +564,8 @@ Exp* Exp_analysis(Node *s)
 		case VMINUS:
 			expr=Exp_analysis(s->child[1]);
 			if(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)){
-				//error
-				printf("eeee\n");
+				//error 7
+				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
 			}
 			else{
@@ -577,8 +576,8 @@ Exp* Exp_analysis(Node *s)
 		case VNOT:
 			expr=Exp_analysis(s->child[1]);
 			if(expr->type->kind!=VTINT){
-				//error
-				printf("eeee\n");
+				//error 7
+				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
 			}
 			else{
@@ -591,8 +590,8 @@ Exp* Exp_analysis(Node *s)
 			switch(s->childnum){
 				case 1:
 					if(symbol==NULL){
-						//error
-						printf("eeeee\n");
+						//error 1
+						printf("Error type 1 at Line %d: Undefined variable \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -602,18 +601,18 @@ Exp* Exp_analysis(Node *s)
 					break;
 				case 3:
 					if(symbol==NULL){
-						//error
-						printf("eeeee\n");
+						//error 2
+						printf("Error type 12 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
-						//error
-						printf("eeeee\n");
+						//error 11
+						printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->func->args!=NULL){
-						//error
-						printf("eeeee\n");
+						//error 9
+						printf("Error type 9 at Line %d: Function \"%s\" should not have arguments.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -624,13 +623,13 @@ Exp* Exp_analysis(Node *s)
 				case 4:
 					arglist=Args_analysis(s->child[2]);
 					if(symbol==NULL){
-						//error
-						printf("eeeeee\n");
+						//error 2
+						printf("Error type 12 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
-						//error
-						printf("eeeee\n");
+						//error 11
+						printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -646,8 +645,8 @@ Exp* Exp_analysis(Node *s)
 						}
 						if(ar1==NULL && ar1==NULL) pan=1;
 						if(pan==0){
-							//error
-							printf("eeeee\n");
+							//error 9
+							printf("Error type 9 at Line %d: Argument(s) is(are) incorrect for function \"%s\".\n",s->lineno,s->child[0]->id_name);
 							exp->type=NULL;
 						}
 						else{
