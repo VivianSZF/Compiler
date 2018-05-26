@@ -379,9 +379,9 @@ void Stmt_analysis(Node *s,Type *type)
 			break;
 		case VIF:
 			type1=Exp_analysis(s->child[2])->type;
-			if(type1->kind!=VTINT){
+			if(type1==NULL||type1->kind!=VTINT){
 				//error 7
-				printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
+				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 			}
 			Stmt_analysis(s->child[4],type);
 			if(s->childnum==7){
@@ -390,7 +390,7 @@ void Stmt_analysis(Node *s,Type *type)
 			break;
 		case VWHILE:
 			type1=Exp_analysis(s->child[2])->type;
-			if(type1->kind!=VTINT){
+			if(type1==NULL||type1->kind!=VTINT){
 				//error 7
 				printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
 			}
@@ -448,8 +448,8 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 			}
 		}
 		else{
-			//error
-			printf("eeeeee\n");
+			//error 15
+			printf("Error type 15 at Line %d: Redefined field \"%s\"\n",symbol->lineno,symbol->name);
 		}
 	}
 	if(s->childnum==3)
@@ -491,7 +491,7 @@ Exp* Exp_analysis(Node *s)
 				case VAND:
 				case VOR:
 					expr=Exp_analysis(s->child[2]);
-					if(expl->type->kind!=VTINT||expr->type->kind!=VTINT){
+					if(expl->type==NULL||expr->type==NULL||expl->type->kind!=VTINT||expr->type->kind!=VTINT){
 						//error 7
 						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
@@ -507,7 +507,7 @@ Exp* Exp_analysis(Node *s)
 				case VSTAR:
 				case VDIV:
 					expr=Exp_analysis(s->child[2]);
-					if((!(expl->type->kind==VTINT||expl->type->kind==VTFLOAT))||(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT))){
+					if((!(expl->type!=NULL&&(expl->type->kind==VTINT||expl->type->kind==VTFLOAT)))||(!(expr->type!=NULL&&(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)))){
 						//error 7
 						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
@@ -519,14 +519,14 @@ Exp* Exp_analysis(Node *s)
 					break;
 				case VLB:
 					expr=Exp_analysis(s->child[2]);
-					if(expl->type->kind!=VTARRAY){
+					if(expl->type==NULL||expl->type->kind!=VTARRAY){
 						//error 10
-						printf("Error type 10 at Line %d: \"%s\" is not an array\n",s->lineno,s->child[0]->id_name);
+						printf("Error type 10 at Line %d: \"%s\" is not an array\n",s->lineno,s->child[0]->child[0]->id_name);
 						exp->type=NULL;
 					}
-					else if(expr->type->kind!=VTINT){
+					else if(expl->type==NULL||expr->type->kind!=VTINT){
 						//error 12
-						printf("Error type 12 at Line %d: \"%f\" is not an integer.\n",s->lineno,s->child[2]->float_value);
+						printf("Error type 12 at Line %d: \"%g\" is not an integer.\n",s->lineno,s->child[2]->child[0]->float_value);
 						exp->type=NULL;
 					}
 					else{
@@ -535,7 +535,7 @@ Exp* Exp_analysis(Node *s)
 					}
 					break;
 				case VDOT:
-					if(expl->type->kind!=VTSTRUCT){
+					if(expl->type==NULL||expl->type->kind!=VTSTRUCT){
 						//error 13
 						printf("Error type 13 at Line %d: Illegal use of \".\".\n",s->lineno);
 						exp->type=NULL;
@@ -563,7 +563,7 @@ Exp* Exp_analysis(Node *s)
 			break;
 		case VMINUS:
 			expr=Exp_analysis(s->child[1]);
-			if(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)){
+			if(expr->type==NULL||!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)){
 				//error 7
 				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
@@ -575,7 +575,7 @@ Exp* Exp_analysis(Node *s)
 			break;
 		case VNOT:
 			expr=Exp_analysis(s->child[1]);
-			if(expr->type->kind!=VTINT){
+			if(expr==NULL||expr->type->kind!=VTINT){
 				//error 7
 				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
@@ -585,7 +585,7 @@ Exp* Exp_analysis(Node *s)
 				exp->lorr=VR;
 			}
 			break;			
-		case VID:
+		case VID://?????????????????????????????????????child
 			symbol=hash_search(s->child[0]->id_name);
 			switch(s->childnum){
 				case 1:

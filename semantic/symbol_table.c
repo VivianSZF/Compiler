@@ -165,7 +165,9 @@ void insertStructToStack(Symbolele *symbol, Stack *stack)
 	}
 	else{
 		//error 16
-		printf("Error type 16 at Line %d: Duplicated name \"%s\".\n",symbol->lineno,symbol->name);
+		char *name=malloc(strlen(symbol->name));
+		strcpy(name,symbol->name+1);
+		printf("Error type 16 at Line %d: Duplicated name \"%s\".\n",symbol->lineno,name);
 	}
 }
 
