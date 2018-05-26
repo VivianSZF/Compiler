@@ -284,7 +284,169 @@ Func* VarList_analysis(Node *s,Type *type)
 	func->args=NULL;
 	Symbolele *symbol=ParamDec_analysis(s->child[0]);
 	insertParamsToFuncarg(symbol,func);
+	while(s->childnum==3)
+	{
+		s=s->child[2];
+		symbol=ParamDec_analysis(s->child[0]);
+		insertParamsToFuncarg(symbol,func);
+	}
+	return func;
 }
+
+Symbolele* ParamDec_analysis(Node *s)
+{
+	Type *type=Specifier_analysis(s->child[0]);
+	Symbolele *symbol=VarDec_analysis(s->child[1],type);
+	return symbol;
+}
+
+void CompSt_analysis(Node *s, Func *func)
+{
+	Stack *stack=malloc(sizeof(Stack));
+	stack->firstele=NULL;
+	stack->next=sta;
+	sta=stack;
+	if(func!=NULL){
+		for(Args *ar=func->args;ar!=NULL;ar=ar->next){
+			Symbolele *symbol=ar->a;
+			insertVarToStack(symbol,sta);
+		}
+	}
+	DefList_analysis(s->child[1],NULL);
+	StmtList_analysis(s->child[2]);
+	Stack *stack1=sta;
+	sta=sta->next;
+	for(Symbolt *sbt=stack1->firstele,*ne;sbt!=NULL;sbt=ne)//??
+	{	
+		if(sbt->hash_pre!=NULL)
+			sbt->hash_pre->hash_next=sbt->hash_next;
+		if(sbt->hash_next!=NULL)
+			sbt->hash_next->hash_pre=sbt->hash_pre;
+		ne=sbt->hash_next;
+		if(sbt!=NULL&&sbt->symbol!=NULL) free(sbt->symbol);
+		if(sbt!=NULL) free(sbt);
+	}
+	free(stack1);
+}
+
+void StmtList_analysis(Node *s, Type *type)
+{
+	while(s!=NULL)
+	{
+		Stmt_analysis(s->child[0],type);
+		s=s->child[1];
+	}
+}
+
+void Stmt_analysis(Node *s,Type *type)
+{
+	switch(namemap(s->child[0]->name)){
+		case VExp:
+			Exp_analysis(s->child[0]);
+			break;
+		case VCompSt:
+			CompSt_analysis(s->child[0],NULL);
+			break;
+		case VRETURN:
+			Type *type1=Exp_analysis(s->child[1]);
+			if(type_equiv_detect(type,type1)==0){
+				//error
+				printf("eeeeee\n");
+			}
+			break;
+		case VIF:
+			Type *type1=Exp_analysis(s->child[2]);
+			if(type1->kind!=TINT){
+				//error
+				printf("eeeeee\n");
+			}
+			Stmt_analysis(s->child[4],type);
+			if(s->childnum==7){
+				Stmt_analysis(s->child[6],type);
+			}
+			break;
+		case VWHILE:
+			Type *type1=Exp_analysis(s->child[2]);
+			if(type1->kind!=TINT){
+				//error
+				printf("eeeeee\n");
+			}
+			Stmt_analysis(s->child[4],type);
+			break;
+		default:
+			printf("Error!\n");
+			break;
+	}
+}
+
+void DefList_analysis(Node *s,Type *type)
+{
+	while(s!=NULL)
+	{
+		Def_analysis(s->child[0],type);
+		s=s->child[1];
+	}
+}
+
+void Def_analysis(Node *s, Type *type)
+{
+	Type *type1=Specifier_analysis(s->child[0]);
+	DecList_analysis(s->child[1],type,type1);
+}
+
+void DecList_analysis(Node *s,Type *type,Type *type1)
+{
+	Dec_analysis(s->child[0],type,type1);
+	while(s->childnum==3)
+	{
+		s=s->child[2];
+		Dec_analysis(s->child[0],type,type1);
+	}
+}
+
+void Dec_analysis(Node *s,Type *type,Type *type1)
+{
+	Symbolele* symbol=VarDec_analysis(s->child[0],type1);
+	if(type==NULL){
+		insertVarToStack(symbol,sta);
+	}
+	else{
+		if(field_search(symbol->name,type)==NULL){
+			FieldList *fi=malloc(sizeof(FieldList));
+			fi->s=symbol;
+			fi->next=NULL;
+			if(type->structure==NULL){
+				type->structure=fi;
+			}
+			else{
+				FieldList *temp=type->structure;
+				fi->next=temp;
+				type->structure=fi;
+			}
+		}
+		else{
+			//error
+			printf("eeeeee\n");
+		}
+	}
+	if(s->childnum==3)
+	{	
+		Exp_analysis(s->child[2]);
+	}
+}
+
+Type *Exp_anaylsis(Node *s)
+{
+	switch(namemap(s->child[0]->name)){
+		case VExp:
+		case VLP:
+		case VMINUS:
+		case VNOT:
+		case VID:
+		case VINT:
+		case VFLOAT:
+}
+
 
 
 

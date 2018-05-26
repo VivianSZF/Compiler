@@ -101,6 +101,15 @@ Symbolele *hash_search(char *name)
 	return NULL;
 }
 
+FieldList *field_search(char *name, Type *type)
+{
+	for(FieldList *p=type->structure;p!=NULL;p=p->next){
+		if (strcmp(p->s->name,name)==0) 
+			return p;
+	}
+	return NULL;
+}
+
 void insertToStack(Symbolele *symbol, Stack *stack)
 {
 	Symbolt *sbt=malloc(sizeof(Symbolt));
@@ -131,6 +140,7 @@ void insertVarToStack(Symbolele *symbol, Stack *stack)
 	}
 	else{
 		//error
+		printf("eeeee\n");
 	}
 }
 
@@ -142,10 +152,22 @@ void insertStructToStack(Symbolele *symbol, Stack *stack)
 	}
 	else{
 		//error
+		printf("eeeeee\n");
 	}
 }
 
-void insertParamsToFuncarg(Symbolele *symbol, Stack *stack)
+void insertParamsToFuncarg(Symbolele *symbol, Func *func)
 {	
-	
+	Args *ar=malloc(sizeof(Args));
+	ar->a=symbol;
+	ar->next=NULL;
+	ar func->args next
+	if(func->args==NULL){
+		func->args=ar;
+	}	
+	else{
+		Args *temp=func->args;
+		ar->next=temp;
+		func->args=ar;
+	}
 }

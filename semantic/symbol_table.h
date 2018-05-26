@@ -10,7 +10,8 @@ typedef struct Symbolt Symbolt;
 typedef struct Stack Stack;
 typedef struct Array Array;
 
-enum{VDEF,VDEC}
+enum{VDEF,VDEC};
+enum{VL,VR};
 
 struct Type_
 {
@@ -43,6 +44,12 @@ struct Func
 		Symbolele *a;
 		Args *next;
 	}*args;
+};
+
+struct Exp
+{
+	Type *type;
+	int lorr;
 };
 
 struct Symbolele
