@@ -8,8 +8,9 @@ typedef struct Args Args;
 typedef struct Func Func;
 typedef struct Symbolt Symbolt;
 typedef struct Stack Stack;
+typedef struct Array Array;
 
-enum {SVAR,SARRAY,SSTRUCT};
+enum{VDEF,VDEC}
 
 struct Type_
 {
@@ -20,7 +21,7 @@ struct Type_
 		{
 			Type *elem;
 			int size;
-		}array;
+		}*array;
 		FieldList *structure;
 	}u;
 };
@@ -36,6 +37,7 @@ struct Func
 {
 	Type *type;
 	int cnt;
+	int defordec;
 	struct Args
 	{
 		Symbolele *a;

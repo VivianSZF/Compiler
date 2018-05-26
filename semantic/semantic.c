@@ -83,11 +83,11 @@ void ExtDef_analysis(Node *s)
 		case VFunDec:
 			switch(namemap(s->child[2]->name)){
 				case VCompSt:
-					func=Func_analysis(s->child[1],type,1);
+					func=Func_analysis(s->child[1],type,VDEF);
 					CompSt_analysis(s->child[2],func);
 					break;
 				case VSEMI:
-					func=Func_analysis(s->child[1],type,0);// change the chanshengshi
+					func=Func_analysis(s->child[1],type,VDEC);// change the chanshengshi
 					break;
 				default:
 					printf("Error!\n");
@@ -113,7 +113,7 @@ void ExtDecList_analysis(Node *s, Type *type)
 
 Type* Specifier_analysis(Node *s)
 {
-	Type *type=NULL;
+	Type *type;
 	switch(namemap(s->child[0]->name)){
 		case VTYPE:
 			type=(Type *)malloc(sizeof(Type);
@@ -134,6 +134,161 @@ Type* Specifier_analysis(Node *s)
 
 Type* StructSpecifier_analysis(Node *s)
 {
-	char *name;
-	
+	Type *type;
+	Symbolele* symbol;
+	switch(namemap(s->child[1]->name)){
+		case VOptTag:
+			Type *type1=type_for_struct();
+			char *name=malloc(strlen(s->child[1]->id_name)+2);
+			*name='!';strcpy(name+1,s->child[1]->id_name);
+			symbol=symbol_for_nonfunc(type1,name,s->lineno);
+			type=symbol->type;
+			insertStructToStack(symbol,sta);
+			DefList_analysis(s->child[3]);
+			break;
+		case VUnknown:
+			Type *type1=type_for_struct();
+			symbol=symbol_for_nonfunc(type1,"NULL",s->lineno);
+			type=symbol->type;
+			DefList_analysis(s->child[3]);
+			break;
+		case VTag:
+			char *name=malloc(strlen(s->child[1]->id_name)+2);
+			*name='!';strcpy(name+1,s->child[1]->id_name);
+			symbol=hash_search(name);
+			if(symbol==NULL){ 
+				type=NULL;
+				//error
+				printf("eeee\n");
+			}
+			else type=symbol->type;	
+			break;
+		default:
+			printf("Error!\n");
+			break;
+	}
+	return type;
 }	
+
+Symbolele* VarDec_analysis(Node *s, Type *type)
+{
+	Symbolele *symbol;
+	switch(namemap(s->child[0])){
+		case VID:
+			symbol=symbol_for_nonfunc(type,s->child[0]->id_name,s->lineno);
+			break;
+		case VVarDec:
+			Type *type1,*type2;
+			type1=type_for_array(type,s->child[2]->int_value);
+			s=s->child[0];
+			while(namemap(s->child[0]->name)==VVarDec){
+				type2=type_for_array(type1,s->child[2]->int_value);
+				type1=type2;
+				s=s->child[0];
+			}
+			symbol=symbol_for_nonfunc(type1,s->child[0]->id_name,s->lineno);
+			break;
+		default:
+			printf("Error!\n");
+			break;
+	}
+	return symbol;
+}
+
+Func* FunDec_analysis(Node *s, Type *type, int defordec)
+{
+	Func* func;
+	switch(namemap(s->child[2]->name)){
+		case VVarList:
+			func=VarList_analysis(s->child[2],type);
+			break;
+		case VRP:
+			Func* func1=malloc(sizeof(Func));
+			func1->type=type;
+			func1->args=NULL;
+			func=func1;
+			break;
+		default:
+			printf("Error!\n");
+			break;
+	}
+	func->defordec=defordec;
+	Symbolele *symbol;
+	symbol=symbol_for_func(func,s->child[0]->id_name,s->lineno);
+	if(defordec==VDEF){
+		Symbolele *symbolold=hash_search(symbol->name);
+		if(symbolold==NULL){
+			insertToStack(symbol,sta);
+		}
+		else if(symbolold->funcornot==1){
+			if(symbolold->func->defordec==VDEF){
+				//error  redefined function
+				printf("eeeee\n");
+			}
+			else{
+				Args *ar1,*ar2;
+				ar1=symbol->func->args;ar2=symbolold->func->args;
+				int pan=0;
+				while(ar1!=NULL && ar2!=NULL){
+					if(type_equiv_detect(ar1->a->type,ar2->a->type)==0){
+						pan=0;break;
+					}
+					ar1=ar1->next;ar2=ar2->next;
+				}
+				if(ar1==NULL && ar2==NULL) pan=1;
+				if(pan==0){
+					//error inconsistent func def
+					printf("eeeee\n");
+				}
+				symbolold->func->defordec=VDEF;
+			}
+		}
+		else{
+			//error redefined func				
+			printf("eeeeee\n");
+		}
+	}
+	else{
+		Symbolele *symbolold=hash_search(symbol->name);
+		if(symbolold==NULL){
+			insertToStack(symbol,sta);
+		}
+		else if(symbolold->funcornot==1){
+			Args *ar1,*ar2;
+			ar1=symbol->func->args;ar2=symbolold->func->args;
+			int pan=0;
+			while(ar1!=NULL && ar2!=NULL){
+				if(type_equiv_detect(ar1->a->type,ar2->a->type)==0){
+					pan=0;break;
+				}
+				ar1=ar1->next;ar2=ar2->next;
+			}
+			if(ar1==NULL && ar2==NULL) pan=1;
+			if(pan==0){
+				//error inconsistent func def
+				printf("eeeee\n");
+			}		
+		}
+		else{
+			//error redefined func
+			printf("eeeee\n");
+		}
+	}
+	return func;
+}
+
+Func* VarList_analysis(Node *s,Type *type)
+{
+	Func *func=malloc(sizeof(Func));
+	func->type=type;
+	func->args=NULL;
+	Symbolele *symbol=ParamDec_analysis(s->child[0]);
+	insertParamsToFuncarg(symbol,func);
+}
+
+
+
+
+
+
+
