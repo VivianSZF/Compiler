@@ -4,8 +4,8 @@
 #include <stdint.h>
 #define SIZE 0x3fff
 
-typedef struct Type Type;
-typedef struct FieldList FieldList;
+typedef struct Type_ Type;
+typedef struct FieldList_ FieldList;
 typedef struct Symbolele Symbolele;
 typedef struct Args Args;
 typedef struct Func Func;
@@ -20,7 +20,7 @@ enum{VL,VR};
 
 struct Type_
 {
-	enum{TINT,TFLOAT,TARRAY,TSTRUCT}kind;
+	enum{VTINT,VTFLOAT,VTARRAY,VTSTRUCT}kind;
 	union
 	{
 		struct Array
@@ -29,7 +29,7 @@ struct Type_
 			int size;
 		}*array;
 		FieldList *structure;
-	}u;
+	};
 };
 
 struct FieldList_
@@ -61,7 +61,7 @@ struct Arg
 {
 	Type *type;
 	Arg *next; 
-}
+};
 
 struct Symbolele
 {
@@ -104,6 +104,6 @@ void insertStructToStack(Symbolele *symbol, Stack *stack);
 void insertParamsToFuncarg(Symbolele *symbol, Func *func);
 
 extern Symbolt *hash[SIZE];
-
+extern Stack *sta;
 
 #endif

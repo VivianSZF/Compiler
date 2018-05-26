@@ -2,6 +2,7 @@
 #include "symbol_table.h"
 #include "semantic.h"
 #include <string.h>
+#include <stdlib.h>
 
 
 int namemap(char *name)
@@ -29,7 +30,7 @@ int namemap(char *name)
 	else if(strcmp(name,"LC")==0) return VLC;
 	else if(strcmp(name,"RC")==0) return VRC;
 	else if(strcmp(name,"STRUCT")==0) return VSTRUCT;
-	else if(strcmp(name,"RETURN")==0) return VRETURE;
+	else if(strcmp(name,"RETURN")==0) return VRETURN;
 	else if(strcmp(name,"IF")==0) return VIF;
 	else if(strcmp(name,"ELSE")==0) return VELSE;
 	else if(strcmp(name,"WHILE")==0) return VWHILE;
@@ -99,11 +100,11 @@ void ExtDef_analysis(Node *s)
 		case VFunDec:
 			switch(namemap(s->child[2]->name)){
 				case VCompSt:
-					func=Func_analysis(s->child[1],type,VDEF);
+					func=FunDec_analysis(s->child[1],type,VDEF);
 					CompSt_analysis(s->child[2],func);
 					break;
 				case VSEMI:
-					func=Func_analysis(s->child[1],type,VDEC);// change the chanshengshi
+					func=FunDec_analysis(s->child[1],type,VDEC);// change the chanshengshi
 					break;
 				default:
 					printf("Error!\n");
@@ -113,11 +114,12 @@ void ExtDef_analysis(Node *s)
 		default:
 			printf("Error!\n");
 			break;	
+	}
 }
 
 void ExtDecList_analysis(Node *s, Type *type)
 {
-	Symbol *symbol=VarDec_analysis(s->child[0],type);
+	Symbolele *symbol=VarDec_analysis(s->child[0],type);
 	insertVarToStack(symbol,sta);
 	while(s->childnum==3)
 	{//???????????????? ==1???
@@ -132,11 +134,11 @@ Type* Specifier_analysis(Node *s)
 	Type *type;
 	switch(namemap(s->child[0]->name)){
 		case VTYPE:
-			type=(Type *)malloc(sizeof(Type);
+			type=(Type *)malloc(sizeof(Type));
 			if(s->child[0]->type==0)
-				type.kind=TINT;
+				type->kind=VTINT;
 			else if(s->child[0]->type==1)
-				type.kind=TFLOAT;
+				type->kind=VTFLOAT;
 			break;
 		case VStructSpecifier:
 			type=StructSpecifier_analysis(s->child[0]);
@@ -150,26 +152,27 @@ Type* Specifier_analysis(Node *s)
 
 Type* StructSpecifier_analysis(Node *s)
 {
-	Type *type;
+	Type *type,*type1;
 	Symbolele* symbol;
+	char *name;
 	switch(namemap(s->child[1]->name)){
 		case VOptTag:
-			Type *type1=type_for_struct();
-			char *name=malloc(strlen(s->child[1]->id_name)+2);
+			type1=type_for_struct();
+			name=(char *)malloc(strlen(s->child[1]->id_name)+2);
 			*name='!';strcpy(name+1,s->child[1]->id_name);
 			symbol=symbol_for_nonfunc(type1,name,s->lineno);
 			type=symbol->type;
 			insertStructToStack(symbol,sta);
-			DefList_analysis(s->child[3]);
+			DefList_analysis(s->child[3],type);
 			break;
 		case VUnknown:
-			Type *type1=type_for_struct();
+			type1=type_for_struct();
 			symbol=symbol_for_nonfunc(type1,"NULL",s->lineno);
 			type=symbol->type;
-			DefList_analysis(s->child[3]);
+			DefList_analysis(s->child[3],type);
 			break;
 		case VTag:
-			char *name=malloc(strlen(s->child[1]->id_name)+2);
+			name=(char *)malloc(strlen(s->child[1]->id_name)+2);
 			*name='!';strcpy(name+1,s->child[1]->id_name);
 			symbol=hash_search(name);
 			if(symbol==NULL){ 
@@ -189,12 +192,12 @@ Type* StructSpecifier_analysis(Node *s)
 Symbolele* VarDec_analysis(Node *s, Type *type)
 {
 	Symbolele *symbol;
-	switch(namemap(s->child[0])){
+	Type *type1,*type2;
+	switch(namemap(s->child[0]->name)){
 		case VID:
 			symbol=symbol_for_nonfunc(type,s->child[0]->id_name,s->lineno);
 			break;
 		case VVarDec:
-			Type *type1,*type2;
 			type1=type_for_array(type,s->child[2]->int_value);
 			s=s->child[0];
 			while(namemap(s->child[0]->name)==VVarDec){
@@ -213,13 +216,13 @@ Symbolele* VarDec_analysis(Node *s, Type *type)
 
 Func* FunDec_analysis(Node *s, Type *type, int defordec)
 {
-	Func* func;
+	Func *func,*func1;
 	switch(namemap(s->child[2]->name)){
 		case VVarList:
 			func=VarList_analysis(s->child[2],type);
 			break;
 		case VRP:
-			Func* func1=malloc(sizeof(Func));
+			func1=(Func*)malloc(sizeof(Func));
 			func1->type=type;
 			func1->args=NULL;
 			func=func1;
@@ -329,7 +332,10 @@ void CompSt_analysis(Node *s, Func *func)
 		}
 	}
 	DefList_analysis(s->child[1],NULL);
-	StmtList_analysis(s->child[2]);
+	if(func==NULL)
+		StmtList_analysis(s->child[2],NULL);
+	else
+		StmtList_analysis(s->child[2],func->type);
 	Stack *stack1=sta;
 	sta=sta->next;
 	for(Symbolt *sbt=stack1->firstele,*ne;sbt!=NULL;sbt=ne)//??
@@ -339,7 +345,7 @@ void CompSt_analysis(Node *s, Func *func)
 		if(sbt->hash_next!=NULL)
 			sbt->hash_next->hash_pre=sbt->hash_pre;
 		ne=sbt->hash_next;
-		if(sbt!=NULL&&sbt->symbol!=NULL) free(sbt->symbol);
+		if(sbt!=NULL&&sbt->s!=NULL) free(sbt->s);
 		if(sbt!=NULL) free(sbt);
 	}
 	free(stack1);
@@ -356,6 +362,7 @@ void StmtList_analysis(Node *s, Type *type)
 
 void Stmt_analysis(Node *s,Type *type)
 {
+	Type *type1;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
 			Exp_analysis(s->child[0]);
@@ -364,15 +371,15 @@ void Stmt_analysis(Node *s,Type *type)
 			CompSt_analysis(s->child[0],NULL);
 			break;
 		case VRETURN:
-			Type *type1=Exp_analysis(s->child[1])->type;
+			type1=Exp_analysis(s->child[1])->type;
 			if(type_equiv_detect(type,type1)==0){
 				//error
 				printf("eeeeee\n");
 			}
 			break;
 		case VIF:
-			Type *type1=Exp_analysis(s->child[2])->type;
-			if(type1->kind!=TINT){
+			type1=Exp_analysis(s->child[2])->type;
+			if(type1->kind!=VTINT){
 				//error
 				printf("eeeeee\n");
 			}
@@ -382,8 +389,8 @@ void Stmt_analysis(Node *s,Type *type)
 			}
 			break;
 		case VWHILE:
-			Type *type1=Exp_analysis(s->child[2])->type;
-			if(type1->kind!=TINT){
+			type1=Exp_analysis(s->child[2])->type;
+			if(type1->kind!=VTINT){
 				//error
 				printf("eeeeee\n");
 			}
@@ -454,9 +461,13 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 Exp* Exp_analysis(Node *s)
 {
 	Exp *exp=malloc(sizeof(Exp));
+	Exp *expl,*expr;
+	Symbolele *symbol;
+	Arg *arglist,*ar2;
+	Args *ar1;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
-			Exp *expl=Exp_analysis(s->child[0]);
+			expl=Exp_analysis(s->child[0]);
 			switch(namemap(s->child[1]->name)){
 				case VASSIGNOP:
 					if(expl->lorr==VR){
@@ -465,7 +476,7 @@ Exp* Exp_analysis(Node *s)
 						printf("eeeee\n");
 					}
 					else{
-						Exp *expr=Exp_analysis(s->child[2]);
+						expr=Exp_analysis(s->child[2]);
 						if(type_equiv_detect(expl->type,expr->type)==0){
 							//error
 							exp->type==NULL;
@@ -479,8 +490,8 @@ Exp* Exp_analysis(Node *s)
 					break;
 				case VAND:
 				case VOR:
-					Exp *expr=Exp_analysis(s->child[2]);
-					if(expl->type->kind!=TINT||expr->type->kind!=TINT){
+					expr=Exp_analysis(s->child[2]);
+					if(expl->type->kind!=VTINT||expr->type->kind!=VTINT){
 						//error
 						printf("eeee\n");
 						exp->type=NULL;
@@ -495,8 +506,8 @@ Exp* Exp_analysis(Node *s)
 				case VMINUS:
 				case VSTAR:
 				case VDIV:
-					Exp *expr=Exp_analysis(s->child[2]);
-					if((!(expl->type->kind==TINT||expl->type->kind==TFLOAT))||(!(expr->type->kind==TINT||expr->type->kind==TFLOAT))){
+					expr=Exp_analysis(s->child[2]);
+					if((!(expl->type->kind==VTINT||expl->type->kind==VTFLOAT))||(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT))){
 						//error
 						printf("eeee\n");
 						exp->type=NULL;
@@ -507,13 +518,13 @@ Exp* Exp_analysis(Node *s)
 					}
 					break;
 				case VLB:
-					Exp *expr=Exp_analysis(s->child[2]);
-					if(expl->type->kind!=TARRAY){
+					expr=Exp_analysis(s->child[2]);
+					if(expl->type->kind!=VTARRAY){
 						//error
 						printf("eeeee\n");
 						exp->type=NULL;
 					}
-					else if(expr->type->kind!=TINT){
+					else if(expr->type->kind!=VTINT){
 						//error
 						printf("eeeee\n");
 						exp->type=NULL;
@@ -524,7 +535,7 @@ Exp* Exp_analysis(Node *s)
 					}
 					break;
 				case VDOT:
-					if(expl->type->kind!=TSTRUCT){
+					if(expl->type->kind!=VTSTRUCT){
 						//error
 						printf("eeeee\n");
 						exp->type=NULL;
@@ -551,8 +562,8 @@ Exp* Exp_analysis(Node *s)
 			exp=Exp_analysis(s->child[1]);
 			break;
 		case VMINUS:
-			Exp *expr=Exp_analysis(s->child[1]);
-			if(!(expr->type->kind==TINT||expr->type->kind==TFLOAT)){
+			expr=Exp_analysis(s->child[1]);
+			if(!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)){
 				//error
 				printf("eeee\n");
 				exp->type=NULL;
@@ -563,8 +574,8 @@ Exp* Exp_analysis(Node *s)
 			}
 			break;
 		case VNOT:
-			Exp *expr=Exp_analysis(s->child[1]);
-			if(expr->type->kind!=TINT){
+			expr=Exp_analysis(s->child[1]);
+			if(expr->type->kind!=VTINT){
 				//error
 				printf("eeee\n");
 				exp->type=NULL;
@@ -575,7 +586,7 @@ Exp* Exp_analysis(Node *s)
 			}
 			break;			
 		case VID:
-			Symbolele *symbol=hash_search(s->child[0]->id_name);
+			symbol=hash_search(s->child[0]->id_name);
 			switch(s->childnum){
 				case 1:
 					if(symbol==NULL){
@@ -610,7 +621,7 @@ Exp* Exp_analysis(Node *s)
 					}
 					break;	
 				case 4:
-					Arg *arglist=Args_analysis(s->child[2]);
+					arglist=Args_analysis(s->child[2]);
 					if(symbol==NULL){
 						//error
 						printf("eeeeee\n");
@@ -622,12 +633,11 @@ Exp* Exp_analysis(Node *s)
 						exp->type=NULL;
 					}
 					else{
-						symbol->func->args,arglist
-						Args *ar1=symbol->func->args;
-						Arg *ar2=arglist;
+						ar1=symbol->func->args;
+						ar2=arglist;
 						int pan=0;
 						while(ar1!=NULL&&ar2!=NULL){
-							if(type_equiv_detest(ar1->a->type,ar2->type)==0){
+							if(type_equiv_detect(ar1->a->type,ar2->type)==0){
 								pan=0;
 								break;
 							}
@@ -651,11 +661,11 @@ Exp* Exp_analysis(Node *s)
 			}
 			break;
 		case VINT:
-			exp->type->kind=TINT;
+			exp->type->kind=VTINT;
 			exp->lorr=VR;
 			break;
 		case VFLOAT:
-			exp->type->kind=TFLOAT;
+			exp->type->kind=VTFLOAT;
 			exp->lorr=VR;
 			break;
 		default:
@@ -691,7 +701,7 @@ Arg *Args_analysis(Node *s)
 		}
 		else{
 			Arg *temp1=arglist;
-			arn->next=temp;
+			arn->next=temp1;
 			arglist=arn;
 		}
 	}

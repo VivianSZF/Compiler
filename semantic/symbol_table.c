@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "symbol_table.h"
 #include <stdlib.h>
+#include <string.h>
 
 Symbolt *hash[SIZE];
 Stack *sta;
@@ -34,21 +35,21 @@ Symbolele* symbol_for_func(Func *func, char *name, int lineno)
 	strcpy(symbol->name, name);
 	symbol->funcornot=1;
 	symbol->lineno=lineno;
-	symbol->type=func;
+	symbol->func=func;
 	return symbol;
 }
 
 Type* type_for_struct()
 {
 	Type *type=malloc(sizeof(Type));
-	type->kind=TSTRUCT;
+	type->kind=VTSTRUCT;
 	type->structure=NULL;
 }
 
 Type* type_for_array(Type *elem, int size)
 {
 	Type *type=malloc(sizeof(Type));
-	type->kind=TARRAY;
+	type->kind=VTARRAY;
 	type->array=malloc(sizeof(Array));
 	type->array->elem=elem;
 	type->array->size=size;
@@ -57,23 +58,24 @@ Type* type_for_array(Type *elem, int size)
 
 int type_equiv_detect(Type *t1,Type *t2)
 {
+	FieldList *f1,*f2;
 	if(t1->kind!=t2->kind) return 0;
 	switch(t1->kind){
-		case TINT:
+		case VTINT:
 			return 1;
 			break;
-		case TFLOAT:
+		case VTFLOAT:
 			return 1;
 			break;
-		case TARRAY:
+		case VTARRAY:
 			if(t1->array->size==t2->array->size)
 				return 1;
 			else
 				return 0;
 			break;
-		case TSTRUCT:
-			FieldList *f1=t1->structure;
-			FieldList *f2=t2->structure;
+		case VTSTRUCT:
+			f1=t1->structure;
+			f2=t2->structure;
 			while(f1!=NULL &&f2!=NULL){
 				if(type_equiv_detect(f1->s->type,f2->s->type)==0)
 					return 0;
@@ -103,7 +105,7 @@ Symbolele *stack_search(char *name, Stack *stack)
 Symbolele *hash_search(char *name)
 {
 	uint32_t hashval=hash_pjw(name);
-	for(Symbolt *p=hash[hashvalue]->hash_next;p!=NULL;p=p->hash_next)
+	for(Symbolt *p=hash[hashval]->hash_next;p!=NULL;p=p->hash_next)
 	{
 		if(strcmp(p->s->name,name)==0)
 			return p->s;
@@ -131,7 +133,7 @@ void insertToStack(Symbolele *symbol, Stack *stack)
 	if(sta->firstele==NULL)
 		sta->firstele=sbt;
 	else{
-		sbt->sta_next=sta->firstele;
+		sbt->stack_next=sta->firstele;
 		sta->firstele=sbt;
 	}
 	Symbolt *hasht=hash[hash_pjw(symbol->name)]->hash_next;
@@ -171,7 +173,6 @@ void insertParamsToFuncarg(Symbolele *symbol, Func *func)
 	Args *ar=malloc(sizeof(Args));
 	ar->a=symbol;
 	ar->next=NULL;
-	ar func->args next
 	if(func->args==NULL){
 		func->args=ar;
 	}	
