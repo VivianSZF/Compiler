@@ -348,14 +348,14 @@ void Stmt_analysis(Node *s,Type *type)
 			CompSt_analysis(s->child[0],NULL);
 			break;
 		case VRETURN:
-			Type *type1=Exp_analysis(s->child[1]);
+			Type *type1=Exp_analysis(s->child[1])->type;
 			if(type_equiv_detect(type,type1)==0){
 				//error
 				printf("eeeeee\n");
 			}
 			break;
 		case VIF:
-			Type *type1=Exp_analysis(s->child[2]);
+			Type *type1=Exp_analysis(s->child[2])->type;
 			if(type1->kind!=TINT){
 				//error
 				printf("eeeeee\n");
@@ -366,7 +366,7 @@ void Stmt_analysis(Node *s,Type *type)
 			}
 			break;
 		case VWHILE:
-			Type *type1=Exp_analysis(s->child[2]);
+			Type *type1=Exp_analysis(s->child[2])->type;
 			if(type1->kind!=TINT){
 				//error
 				printf("eeeeee\n");
@@ -435,16 +435,217 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 	}
 }
 
-Type *Exp_anaylsis(Node *s)
+Exp* Exp_analysis(Node *s)
 {
+	Exp *exp=malloc(sizeof(Exp));
 	switch(namemap(s->child[0]->name)){
 		case VExp:
+			Exp *expl=Exp_analysis(s->child[0]);
+			switch(namemap(s->child[1]->name)){
+				case VASSIGNOP:
+					if(expl->lorr==VR){
+						//error
+						exp->type=NULL;
+						printf("eeeee\n");
+					}
+					else{
+						Exp *expr=Exp_analysis(s->child[2]);
+						if(type_equiv_detect(expl->type,expr->type)==0){
+							//error
+							exp->type==NULL;
+							printf("eeeeee\n");
+						}
+						else{
+							exp->type=expl->type;
+							exp->lorr=VR;//????
+						}
+					}
+					break;
+				case VAND:
+				case VOR:
+					Exp *expr=Exp_analysis(s->child[2]);
+					if(expl->type->kind!=TINT||expr->type->kind!=TINT){
+						//error
+						printf("eeee\n");
+						exp->type=NULL;
+					}
+					else{
+						exp->type=expl->type;
+						exp->lorr=VR;
+					}
+					break;
+				case VRELOP:
+				case VPLUS:
+				case VMINUS:
+				case VSTAR:
+				case VDIV:
+					Exp *expr=Exp_analysis(s->child[2]);
+					if((!(expl->type->kind==TINT||expl->type->kind==TFLOAT))||(!(expr->type->kind==TINT||expr->type->kind==TFLOAT))){
+						//error
+						printf("eeee\n");
+						exp->type=NULL;
+					}
+					else{
+						exp->type=expl->type;
+						exp->lorr=VR;
+					}
+					break;
+				case VLB:
+					Exp *expr=Exp_analysis(s->child[2]);
+					if(expl->type->kind!=TARRAY){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else if(expr->type->kind!=TINT){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else{
+						exp->type=expl->type->array->elem;
+						exp->lorr=expl->lorr;
+					}
+					break;
+				case VDOT:
+					if(expl->type->kind!=TSTRUCT){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else{
+						FieldList *fi=field_search(s->child[2]->id_name,expl->type);
+						if(fi==NULL){
+							//error
+							printf("eeeeee\n");
+							exp->type=NULL;
+						}
+						else{
+							exp->type=fi->s->type;
+							exp->lorr=expl->lorr;
+						}
+					}
+					break;
+				default:
+					printf("Error!\n");
+					break;
+			}
+			break;
 		case VLP:
+			exp=Exp_analysis(s->child[1]);
+			break;
 		case VMINUS:
+			Exp *expr=Exp_analysis(s->child[1]);
+			if(!(expr->type->kind==TINT||expr->type->kind==TFLOAT)){
+				//error
+				printf("eeee\n");
+				exp->type=NULL;
+			}
+			else{
+				exp->type=expr->type;
+				exp->lorr=VR;
+			}
+			break;
 		case VNOT:
+			Exp *expr=Exp_analysis(s->child[1]);
+			if(expr->type->kind!=TINT){
+				//error
+				printf("eeee\n");
+				exp->type=NULL;
+			}
+			else{
+				exp->type=expr->type;
+				exp->lorr=VR;
+			}
+			break;			
 		case VID:
+			Symbolele *symbol=hash_search(s->child[0]->id_name);
+			switch(s->childnum){
+				case 1:
+					if(symbol==NULL){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else{
+						exp->type=symbol->type;
+						exp->lorr=VL;
+					}
+					break;
+				case 3:
+					if(symbol==NULL){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else if(symbol->funcornot==0){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else if(symbol->func->args!=NULL){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else{
+						exp->type=symbol->func->type;
+						exp->lorr=VR;
+					}
+					break;	
+				case 4:
+					Arg *arglist=Args_analysis(s->child[2]);
+					if(symbol==NULL){
+						//error
+						printf("eeeeee\n");
+						exp->type=NULL;
+					}
+					else if(symbol->funcornot==0){
+						//error
+						printf("eeeee\n");
+						exp->type=NULL;
+					}
+					else{
+						symbol->func->args,arglist
+						Args *ar1=symbol->func->args;
+						Arg *ar2=arglist;
+						int pan=0;
+						while(ar1!=NULL&&ar2!=NULL){
+							if(type_equiv_detest(ar1->a->type,ar2->type)==0){
+								pan=0;
+								break;
+							}
+							ar1=ar1->next;ar2=ar2->next;
+						}
+						if(ar1==NULL && ar1==NULL) pan=1;
+						if(pan==0){
+							//error
+							printf("eeeee\n");
+							exp->type=NULL;
+						}
+						else{
+							exp->type=symbol->func->type;
+							exp->lorr=VR;
+						}
+					}
+					break;
+				default:
+					printf("Error!\n");
+					break;						
+			}
+			break;
 		case VINT:
+			exp->type->kind=TINT;
+			exp->lorr=VR;
+			break;
 		case VFLOAT:
+			exp->type->kind=TFLOAT;
+			exp->lorr=VR;
+			break;
+		default:
+			printf("Error!\n");
+			break;
+	}
 }
 
 
