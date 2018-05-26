@@ -158,8 +158,8 @@ Type* StructSpecifier_analysis(Node *s)
 	switch(namemap(s->child[1]->name)){
 		case VOptTag:
 			type1=type_for_struct();
-			name=(char *)malloc(strlen(s->child[1]->id_name)+2);
-			*name='!';strcpy(name+1,s->child[1]->id_name);
+			name=(char *)malloc(strlen(s->child[1]->child[0]->id_name)+2);
+			*name='!';strcpy(name+1,s->child[1]->child[0]->id_name);
 			symbol=symbol_for_nonfunc(type1,name,s->lineno);
 			type=symbol->type;
 			insertStructToStack(symbol,sta);
@@ -172,13 +172,13 @@ Type* StructSpecifier_analysis(Node *s)
 			DefList_analysis(s->child[3],type);
 			break;
 		case VTag:
-			name=(char *)malloc(strlen(s->child[1]->id_name)+2);
-			*name='!';strcpy(name+1,s->child[1]->id_name);
+			name=(char*)malloc(strlen(s->child[1]->child[0]->id_name)+2);
+			*name='!';strcpy(name+1,s->child[1]->child[0]->id_name);
 			symbol=hash_search(name);
 			if(symbol==NULL){ 
 				type=NULL;
 				//error 17
-				printf("Error type 17 at Line %d: Undefined structure \"%s\".\n",s->lineno,s->child[1]->id_name);
+				printf("Error type 17 at Line %d: Undefined structure \"%s\".\n",s->lineno,s->child[1]->child[0]->id_name);
 			}
 			else type=symbol->type;	
 			break;
