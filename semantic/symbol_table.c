@@ -1,10 +1,20 @@
 #include <stdio.h>
 #include "symbol_table.h"
-#include "hash.h"
 #include <stdlib.h>
 
 Symbolt *hash[SIZE];
 Stack *sta;
+
+uint32_t hash_pjw(char* name)
+{
+	uint32_t val = 0, i;
+	for(; *name;++name)
+	{
+		val=(val<<2)+*name;
+		if(i=val&~SIZE) val=(val^(i>>12))&SIZE;
+	}
+	return val;
+}
 
 Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno)
 {

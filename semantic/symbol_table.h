@@ -1,6 +1,9 @@
 #ifndef __SYMBOLTABLE_H_
 #define __SYMBOLTABLE_H_
 
+#include <stdint.h>
+#define SIZE 0x3fff
+
 typedef struct Type Type;
 typedef struct FieldList FieldList;
 typedef struct Symbolele Symbolele;
@@ -86,7 +89,21 @@ struct Stack
 	Stack *next;
 };
 
+uint32_t hash_pjw(char* name);
 Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno);
 Symbolele* symbol_for_func(Func *func, char *name, int lineno);
+Type* type_for_struct();
+Type* type_for_array(Type *elem, int size);
+int type_equiv_detect(Type *t1,Type *t2);
+Symbolele *stack_search(char *name, Stack *stack);
+Symbolele *hash_search(char *name);
+FieldList *field_search(char *name, Type *type);
+void insertToStack(Symbolele *symbol, Stack *stack);
+void insertVarToStack(Symbolele *symbol, Stack *stack);
+void insertStructToStack(Symbolele *symbol, Stack *stack);
+void insertParamsToFuncarg(Symbolele *symbol, Func *func);
+
+extern Symbolt *hash[SIZE];
+
 
 #endif

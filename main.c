@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include "treeop.h"
-#include "syntax.tab.h"
+#include "lexical_syntax/treeop.h"
+#include "lexical_syntax/syntax.tab.h"
+#include "semantic/semantic.h"
 
 extern int errornot;
 extern int mark;
@@ -26,7 +27,8 @@ int main(int argc, char** argv){
 
 		yyparse();
 		if(errornot==0){
-			preorderprint(root,0);
+			//preorderprint(root,0);
+			Program_analysis(root);
 		}
 		fclose(f);
 	}

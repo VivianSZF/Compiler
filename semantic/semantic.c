@@ -3,6 +3,7 @@
 #include "semantic.h"
 #include <string.h>
 
+
 int namemap(char *name)
 {
 	if (strcmp(name,"INT")==0) return VINT;
@@ -58,6 +59,21 @@ int namemap(char *name)
 
 void Program_analysis(Node *root)
 {
+	int i;
+	for(i=0;i<SIZE;i++)
+	{
+		Symbolt *sbt=malloc(sizeof(Symbolt));
+		sbt->s=NULL;
+		sbt->stack=NULL;
+		sbt->hash_pre=NULL;
+		sbt->hash_next=NULL;
+		sbt->stack_next=NULL;
+		hash[i]=sbt;
+	}
+	Stack *stack=malloc(sizeof(Stack));
+	stack->firstele=NULL;
+	stack->next=sta;
+	sta=stack;
 	ExtDefList_analysis(root->child[0]);
 }
 
@@ -648,7 +664,39 @@ Exp* Exp_analysis(Node *s)
 	}
 }
 
-
+Arg *Args_analysis(Node *s)
+{
+	Arg *arglist=NULL;
+	Exp *exp=Exp_analysis(s->child[0]);
+	Arg *ar=malloc(sizeof(Arg));
+	ar->type=exp->type;
+	ar->next=NULL;
+	if(arglist==NULL){
+		arglist=ar;
+	}
+	else{
+		Arg *temp=arglist;
+		ar->next=temp;
+		arglist=ar;
+	}
+	while(s->childnum==3)
+	{
+		s=s->child[2];
+		exp=Exp_analysis(s->child[0]);
+		Arg *arn=malloc(sizeof(Arg));
+		arn->type=exp->type;
+		arn->next=NULL;
+		if(arglist==NULL){
+			arglist=arn;
+		}
+		else{
+			Arg *temp1=arglist;
+			arn->next=temp;
+			arglist=arn;
+		}
+	}
+	return arglist;
+}
 
 
 
