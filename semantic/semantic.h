@@ -2,6 +2,7 @@
 #define __SEMANTIC_H_
 
 #include "../lexical_syntax/treeop.h"
+#include "symbol_table.h"
 
 enum {
 	VINT,VFLOAT,VID,VSEMI,VCOMMA,VASSIGNOP,VRELOP,VPLUS,VMINUS,VSTAR,VDIV,VAND,VOR,

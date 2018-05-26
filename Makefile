@@ -5,7 +5,7 @@ syntax:
 	bison -d -v syntax.y
 
 parser:
-	gcc main.c syntax.tab.c treeop.c -lfl -ly -o parser
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -lfl -ly -o parser
 
 clean:
 	rm -f parser

@@ -72,14 +72,14 @@ void Program_analysis(Node *root)
 		hash[i]=sbt;
 	}
 	Stack *stack=malloc(sizeof(Stack));
-	stack->firstele=NULL;
+	stack->firstele=NULL;	
 	stack->next=sta;
 	sta=stack;
 	ExtDefList_analysis(root->child[0]);
 }
 
 void ExtDefList_analysis(Node *s)
-{
+{	
 	while(s!=NULL)
 	{
 		ExtDef_analysis(s->child[0]);
@@ -467,13 +467,14 @@ Exp* Exp_analysis(Node *s)
 	Args *ar1;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
+			printf("here1\n");
 			expl=Exp_analysis(s->child[0]);
 			switch(namemap(s->child[1]->name)){
 				case VASSIGNOP:
 					if(expl->lorr==VR){
 						//error
 						exp->type=NULL;
-						printf("eeeee\n");
+						printf("eeeee1\n");
 					}
 					else{
 						expr=Exp_analysis(s->child[2]);
@@ -661,10 +662,12 @@ Exp* Exp_analysis(Node *s)
 			}
 			break;
 		case VINT:
+			exp->type=(Type*)malloc(sizeof(Type));
 			exp->type->kind=VTINT;
 			exp->lorr=VR;
 			break;
 		case VFLOAT:
+			exp->type=(Type*)malloc(sizeof(Type));
 			exp->type->kind=VTFLOAT;
 			exp->lorr=VR;
 			break;
@@ -672,6 +675,7 @@ Exp* Exp_analysis(Node *s)
 			printf("Error!\n");
 			break;
 	}
+	return exp;
 }
 
 Arg *Args_analysis(Node *s)

@@ -59,6 +59,7 @@ Type* type_for_array(Type *elem, int size)
 int type_equiv_detect(Type *t1,Type *t2)
 {
 	FieldList *f1,*f2;
+	if(t1==NULL||t2==NULL) return 0;
 	if(t1->kind!=t2->kind) return 0;
 	switch(t1->kind){
 		case VTINT:

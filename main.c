@@ -7,6 +7,7 @@ extern int errornot;
 extern int mark;
 extern int errorlineno;
 extern int yylineno;
+extern void yyrestart(FILE* input_file);
 
 int main(int argc, char** argv){
 	if(argc<=1) return 1;
