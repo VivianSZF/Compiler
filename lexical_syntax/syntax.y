@@ -48,6 +48,7 @@ ExtDefList: ExtDef ExtDefList   {$$=add_node(TTOKEN, "ExtDefList", @$.first_line
 ExtDef: Specifier ExtDecList SEMI   {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
     | Specifier SEMI  {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 2,$1,$2);}
     | Specifier FunDec CompSt {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
+	| Specifier FunDec SEMI {$$=add_node(TTOKEN, "ExtDef", @$.first_line, 3,$1,$2,$3);}
 	| Specifier ExtDecList error %prec LOWER_THAN_SEMI	{printerror("Missing \";\".", errorlineno-1);}
     | Specifier ExtDecList error SEMI {
 		if(mark!=errorlineno){ 
