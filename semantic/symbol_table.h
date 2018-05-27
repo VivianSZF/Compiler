@@ -13,7 +13,6 @@ typedef struct Symbolt Symbolt;
 typedef struct Stack Stack;
 typedef struct Array Array;
 typedef struct Exp Exp;
-typedef struct Arg Arg;
 
 enum{VDEF,VDEC};
 enum{VL,VR};
@@ -54,12 +53,6 @@ struct Exp
 {
 	Type *type;
 	int lorr;
-};
-
-struct Arg
-{
-	Type *type;
-	Arg *next; 
 };
 
 struct Symbolele

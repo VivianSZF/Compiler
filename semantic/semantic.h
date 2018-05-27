@@ -31,7 +31,7 @@ void Def_analysis(Node *s, Type *type);
 void DecList_analysis(Node *s,Type *type,Type *type1);
 void Dec_analysis(Node *s,Type *type,Type *type1);
 Exp* Exp_analysis(Node *s);
-Arg *Args_analysis(Node *s);
+Args *Args_analysis(Node *s);
 
 
 #endif

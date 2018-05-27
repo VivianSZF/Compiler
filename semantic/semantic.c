@@ -480,8 +480,7 @@ Exp* Exp_analysis(Node *s)
 	Exp *exp=malloc(sizeof(Exp));
 	Exp *expl,*expr;
 	Symbolele *symbol;
-	Arg *arglist,*ar2;
-	Args *ar1;
+	Args *arglist,*ar1,*ar2;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
 			expl=Exp_analysis(s->child[0]);
@@ -654,7 +653,7 @@ Exp* Exp_analysis(Node *s)
 						ar2=arglist;
 						int pan=0;
 						while(ar1!=NULL&&ar2!=NULL){
-							if(type_equiv_detect(ar1->a->type,ar2->type)==0){
+							if(type_equiv_detect(ar1->a->type,ar2->a->type)==0){
 								pan=0;
 								break;
 							}
@@ -694,18 +693,19 @@ Exp* Exp_analysis(Node *s)
 	return exp;
 }
 
-Arg *Args_analysis(Node *s)
+Args *Args_analysis(Node *s)
 {
-	Arg *arglist=NULL;
+	Args *arglist=NULL;
 	Exp *exp=Exp_analysis(s->child[0]);
-	Arg *ar=malloc(sizeof(Arg));
-	ar->type=exp->type;
+	Args *ar=malloc(sizeof(Args));
+	ar->a=(Symbolele*)malloc(sizeof(Symbolele));
+	ar->a->type=exp->type;
 	ar->next=NULL;
 	if(arglist==NULL){
 		arglist=ar;
 	}
 	else{
-		Arg *temp=arglist;
+		Args *temp=arglist;
 		ar->next=temp;
 		arglist=ar;
 	}
@@ -713,14 +713,15 @@ Arg *Args_analysis(Node *s)
 	{
 		s=s->child[2];
 		exp=Exp_analysis(s->child[0]);
-		Arg *arn=malloc(sizeof(Arg));
-		arn->type=exp->type;
+		Args *arn=malloc(sizeof(Args));
+		arn->a=(Symbolele*)malloc(sizeof(Symbolele));
+		arn->a->type=exp->type;
 		arn->next=NULL;
 		if(arglist==NULL){
 			arglist=arn;
 		}
 		else{
-			Arg *temp1=arglist;
+			Args *temp1=arglist;
 			arn->next=temp1;
 			arglist=arn;
 		}
