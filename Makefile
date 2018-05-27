@@ -1,19 +1,25 @@
 lexical:
-	flex lexical.l
+	flex lexical_syntax/lexical.l
 
 syntax:
-	bison -d -v syntax.y
+	bison -d -v lexical_syntax/syntax.y
 
 parser:
-	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -lfl -ly -o parser
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
 
 clean:
 	rm -f parser
 
 lab1:
-	bison -d -v syntax.y
-	flex lexical.l
-	gcc main.c syntax.tab.c treeop.c -lfl -ly -o parser
+	bison -d -v lexical_syntax/syntax.y
+	flex lexical_syntax/lexical.l
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c -lfl -ly -o parser
+
+lab2:
+	bison -d -v lexical_syntax/syntax.y
+	flex lexical_syntax/lexical.l
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
+
 
 testc1:
 	./parser test/compulsory/1.cmm
@@ -27,6 +33,45 @@ testc3:
 testc4:
 	./parser test/compulsory/4.cmm
 
+testc5:
+	./parser test/compulsory/5.cmm
+
+testc6:
+	./parser test/compulsory/6.cmm
+
+testc7:
+	./parser test/compulsory/7.cmm
+
+testc8:
+	./parser test/compulsory/8.cmm
+
+testc9:
+	./parser test/compulsory/9.cmm
+
+testc10:
+	./parser test/compulsory/10.cmm
+
+testc11:
+	./parser test/compulsory/11.cmm
+
+testc12:
+	./parser test/compulsory/12.cmm
+
+testc13:
+	./parser test/compulsory/13.cmm
+
+testc14:
+	./parser test/compulsory/14.cmm
+
+testc15:
+	./parser test/compulsory/15.cmm
+
+testc16:
+	./parser test/compulsory/16.cmm
+
+testc17:
+	./parser test/compulsory/17.cmm
+
 testo1:
 	./parser test/others/1.cmm
 
@@ -36,11 +81,5 @@ testo2:
 testo3:
 	./parser test/others/3.cmm
 
-testo4:
-	./parser test/others/4.cmm
-
-testo5:
-	./parser test/others/5.cmm
-
-testo6:
-	./parser test/others/6.cmm
+testall:
+	./parser test/compulsory/1.cmm test/compulsory/2.cmm test/compulsory/3.cmm test/compulsory/4.cmm test/compulsory/5.cmm test/compulsory/6.cmm test/compulsory/7.cmm test/compulsory/8.cmm test/compulsory/9.cmm test/compulsory/10.cmm test/compulsory/11.cmm test/compulsory/12.cmm test/compulsory/13.cmm test/compulsory/14.cmm test/compulsory/15.cmm test/compulsory/16.cmm test/compulsory/17.cmm test/others/1.cmm test/others/2.cmm test/others/3.cmm
