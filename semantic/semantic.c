@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+int struct_varassign;
 
 int namemap(char *name)
 {
@@ -78,6 +79,7 @@ void Program_analysis(Node *root)
 {
 	int i;
 	memset(errortable,0,sizeof(errortable));
+	struct_varassign=0;
 	for(i=0;i<SIZE;i++)
 	{
 		Symbolt *sbt=malloc(sizeof(Symbolt));
@@ -215,7 +217,9 @@ Type* StructSpecifier_analysis(Node *s)
 				if(error_search(16,symbol->lineno)==0)
 					printf("Error type 16 at Line %d: Duplicated name \"%s\".\n",symbol->lineno,name);
 			}
+			struct_varassign=1;
 			DefList_analysis(s->child[3],type);
+			struct_varassign=0;
 			break;
 		case VUnknown:
 			type=(Type*)malloc(sizeof(Type));
@@ -561,6 +565,11 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 	}
 	if(s->childnum==3)
 	{	
+		if(struct_varassign==1){
+			//error 15
+			if(error_search(15,symbol->lineno*(-1))==0)
+				printf("Error type 15 at Line %d: Invalid assignment to field \"%s\".\n",symbol->lineno,symbol->name);	
+		}
 		Exp_analysis(s->child[2]);
 	}
 }

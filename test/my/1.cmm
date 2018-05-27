@@ -1,0 +1,16 @@
+struct Position
+{
+	int i,j,h;
+	int i=1;
+	int k=3;
+};
+
+int main()
+{
+	int a[10][23];
+	float b[12][23];
+	struct Position p;
+	a[1][1]=b[2][2];
+	p.j=1.0;
+	p.h=1;
+}
