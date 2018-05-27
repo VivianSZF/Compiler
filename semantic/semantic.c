@@ -76,6 +76,13 @@ void Program_analysis(Node *root)
 	stack->next=sta;
 	sta=stack;
 	ExtDefList_analysis(root->child[0]);
+	for(Symbolt *p=sta->firstele;p!=NULL;p=p->stack_next)
+	{
+		if(p->s->funcornot==1 && p->s->func->defordec==VDEC){
+			//error 18
+			printf("Error type 18 at Line %d: Undefined function \"%s\".\n",p->s->lineno,p->s->name);
+		}
+	}
 }
 
 void ExtDefList_analysis(Node *s)
@@ -507,7 +514,7 @@ Exp* Exp_analysis(Node *s)
 				case VSTAR:
 				case VDIV:
 					expr=Exp_analysis(s->child[2]);
-					if((!(expl->type!=NULL&&(expl->type->kind==VTINT||expl->type->kind==VTFLOAT)))||(!(expr->type!=NULL&&(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)))){
+					if((!(expl->type!=NULL&&(expl->type->kind==VTINT||expl->type->kind==VTFLOAT)))||(!(expr->type!=NULL&&(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)))||type_equiv_detect(expl->type,expr->type)==0){
 						//error 7
 						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
