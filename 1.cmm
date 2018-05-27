@@ -1,5 +1,13 @@
+struct Position
+{
+	int i;
+	int a[10];
+};
 int main()
 {
-	int a,b,c,f,g,d;
-	d = 3;
+	int a[10];
+	int i;
+	struct Position p;
+	p.i=3;
+	a[1]=3;
 }

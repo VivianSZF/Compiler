@@ -12,7 +12,11 @@ enum {
 	VDecList,VDec,VExp,VArgs,VUnknown
 };
 
+
+int errortable[19][500];
+
 int namemap(char *name);
+int error_search(int errortype, int lineno);
 void Program_analysis(Node *root);
 void ExtDefList_analysis(Node *s);
 void ExtDef_analysis(Node *s);

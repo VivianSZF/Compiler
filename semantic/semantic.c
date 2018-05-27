@@ -58,9 +58,26 @@ int namemap(char *name)
 	else return VUnknown;
 }
 
+int error_search(int errortype, int lineno)
+{
+	int pan=0;
+	int mark=0;
+	for(int i=0;i<500;i++){
+		if(errortable[errortype-1][i]==lineno)
+			return 1;
+		if(errortable[errortype-1][i]==0){
+			mark=i;
+			break;
+		}
+	}
+	errortable[errortype-1][mark]=lineno;
+	return 0;
+}
+
 void Program_analysis(Node *root)
 {
 	int i;
+	memset(errortable,0,sizeof(errortable));
 	for(i=0;i<SIZE;i++)
 	{
 		Symbolt *sbt=malloc(sizeof(Symbolt));
@@ -68,6 +85,7 @@ void Program_analysis(Node *root)
 		sbt->stack=NULL;
 		sbt->hash_pre=NULL;
 		sbt->hash_next=NULL;
+		sbt->stack_pre=NULL;
 		sbt->stack_next=NULL;
 		hash[i]=sbt;
 	}
@@ -80,7 +98,8 @@ void Program_analysis(Node *root)
 	{
 		if(p->s->funcornot==1 && p->s->func->defordec==VDEC){
 			//error 18
-			printf("Error type 18 at Line %d: Undefined function \"%s\".\n",p->s->lineno,p->s->name);
+			if(error_search(18,p->s->lineno)==0)
+				printf("Error type 18 at Line %d: Undefined function \"%s\".\n",p->s->lineno,p->s->name);
 		}
 	}
 }
@@ -127,12 +146,28 @@ void ExtDef_analysis(Node *s)
 void ExtDecList_analysis(Node *s, Type *type)
 {
 	Symbolele *symbol=VarDec_analysis(s->child[0],type);
-	insertVarToStack(symbol,sta);
+	if(stack_search(symbol->name,sta)==NULL)
+	{
+		insertToStack(symbol,sta);
+	}
+	else{
+		//error 3
+		if(error_search(3,symbol->lineno)==0)
+			printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
+	}
 	while(s->childnum==3)
 	{
 		s=s->child[2];
 		symbol=VarDec_analysis(s->child[0],type);
-		insertVarToStack(symbol,sta);
+		if(stack_search(symbol->name,sta)==NULL)
+		{
+			insertToStack(symbol,sta);
+		}
+		else{
+			//error 3
+			if(error_search(3,symbol->lineno)==0)
+				printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
+		}
 	}	
 }
 
@@ -170,7 +205,16 @@ Type* StructSpecifier_analysis(Node *s)
 			name=(char *)malloc(strlen(s->child[1]->child[0]->id_name)+2);
 			*name='!';strcpy(name+1,s->child[1]->child[0]->id_name);
 			symbol=symbol_for_nonfunc(type,name,s->lineno);
-			insertStructToStack(symbol,sta);
+			if(stack_search(symbol->name,sta)==NULL){
+				insertToStack(symbol,sta);
+			}
+			else{
+				//error 16
+				char *name=malloc(strlen(symbol->name));
+				strcpy(name,symbol->name+1);
+				if(error_search(16,symbol->lineno)==0)
+					printf("Error type 16 at Line %d: Duplicated name \"%s\".\n",symbol->lineno,name);
+			}
 			DefList_analysis(s->child[3],type);
 			break;
 		case VUnknown:
@@ -187,7 +231,8 @@ Type* StructSpecifier_analysis(Node *s)
 			if(symbol==NULL){ 
 				type=NULL;
 				//error 17
-				printf("Error type 17 at Line %d: Undefined structure \"%s\".\n",s->lineno,s->child[1]->child[0]->id_name);
+				if(error_search(17,s->lineno)==0)
+					printf("Error type 17 at Line %d: Undefined structure \"%s\".\n",s->lineno,s->child[1]->child[0]->id_name);
 			}
 			else type=symbol->type;	
 			break;
@@ -259,7 +304,8 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 		else if(symbolold->funcornot==1){
 			if(symbolold->func->defordec==VDEF){
 				//error 4
-				printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
+				if(error_search(4,symbol->lineno)==0)
+					printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 			}
 			else{
 				Args *ar1,*ar2;
@@ -274,14 +320,16 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 				if(ar1==NULL && ar2==NULL) pan=1;
 				if(pan==0){
 					//error 19
-					printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
+					if(error_search(19,symbol->lineno)==0)
+						printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
 				}
 				symbolold->func->defordec=VDEF;
 			}
 		}
 		else{
 			//error 4				
-			printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
+			if(error_search(4,symbol->lineno)==0)
+				printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 		}
 	}
 	else{
@@ -302,12 +350,14 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 			if(ar1==NULL && ar2==NULL) pan=1;
 			if(pan==0){
 				//error 19
-				printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
+				if(error_search(19,symbol->lineno)==0)
+					printf("Error type 19 at Line %d: Inconsistent declaration of function \"%s\".\n",symbol->lineno,symbol->name);
 			}		
 		}
 		else{
 			//error 4
-			printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
+			if(error_search(4,symbol->lineno)==0)
+				printf("Error type 4 at Line %d: Redefined function \"%s\".\n",symbol->lineno,symbol->name);
 		}
 	}
 	return func;
@@ -319,12 +369,32 @@ Func* VarList_analysis(Node *s,Type *type)
 	func->type=type;
 	func->args=NULL;
 	Symbolele *symbol=ParamDec_analysis(s->child[0]);
-	insertParamsToFuncarg(symbol,func);
+	Args *ar=malloc(sizeof(Args));
+	ar->a=symbol;
+	ar->next=NULL;
+	if(func->args==NULL){
+		func->args=ar;
+	}	
+	else{
+		Args *temp=func->args;
+		ar->next=temp;
+		func->args=ar;
+	}	
 	while(s->childnum==3)
 	{
 		s=s->child[2];
 		symbol=ParamDec_analysis(s->child[0]);
-		insertParamsToFuncarg(symbol,func);
+		ar=(Args*)malloc(sizeof(Args));
+		ar->a=symbol;
+		ar->next=NULL;
+		if(func->args==NULL){
+			func->args=ar;
+		}	
+		else{
+			Args *temp=func->args;
+			ar->next=temp;
+			func->args=ar;
+		}
 	}
 	return func;
 }
@@ -345,7 +415,15 @@ void CompSt_analysis(Node *s, Func *func)
 	if(func!=NULL){
 		for(Args *ar=func->args;ar!=NULL;ar=ar->next){
 			Symbolele *symbol=ar->a;
-			insertVarToStack(symbol,sta);
+			if(stack_search(symbol->name,sta)==NULL)
+			{
+				insertToStack(symbol,sta);
+			}
+			else{
+				//error 3
+				if(error_search(3,symbol->lineno)==0)
+					printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
+			}
 		}
 	}
 	DefList_analysis(s->child[1],NULL);
@@ -355,7 +433,7 @@ void CompSt_analysis(Node *s, Func *func)
 		StmtList_analysis(s->child[2],func->type);
 	Stack *stack1=sta;
 	sta=sta->next;
-	for(Symbolt *sbt=stack1->firstele,*ne;sbt!=NULL;sbt=ne)//??
+	for(Symbolt *sbt=stack1->firstele,*ne;sbt!=NULL;sbt=ne)
 	{	
 		if(sbt->hash_pre!=NULL)
 			sbt->hash_pre->hash_next=sbt->hash_next;
@@ -391,14 +469,16 @@ void Stmt_analysis(Node *s,Type *type)
 			type1=Exp_analysis(s->child[1])->type;
 			if(type_equiv_detect(type,type1)==0){
 				//error 8
-				printf("Error type 8 at Line %d: Type mismatched for return.\n", s->lineno);
+				if(error_search(8,s->lineno)==0)
+					printf("Error type 8 at Line %d: Type mismatched for return.\n", s->lineno);
 			}
 			break;
 		case VIF:
 			type1=Exp_analysis(s->child[2])->type;
 			if(type1==NULL||type1->kind!=VTINT){
 				//error 7
-				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
+				if(error_search(7,s->lineno)==0)
+					printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 			}
 			Stmt_analysis(s->child[4],type);
 			if(s->childnum==7){
@@ -409,7 +489,8 @@ void Stmt_analysis(Node *s,Type *type)
 			type1=Exp_analysis(s->child[2])->type;
 			if(type1==NULL||type1->kind!=VTINT){
 				//error 7
-				printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
+				if(error_search(7,s->lineno)==0)
+					printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
 			}
 			Stmt_analysis(s->child[4],type);
 			break;
@@ -448,7 +529,15 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 {
 	Symbolele* symbol=VarDec_analysis(s->child[0],type1);
 	if(type==NULL){
-		insertVarToStack(symbol,sta);
+		if(stack_search(symbol->name,sta)==NULL)
+		{
+			insertToStack(symbol,sta);
+		}
+		else{
+			//error 3
+			if(error_search(3,symbol->lineno)==0)
+				printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
+		}
 	}
 	else{
 		if(field_search(symbol->name,type)==NULL){
@@ -466,7 +555,8 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 		}
 		else{
 			//error 15
-			printf("Error type 15 at Line %d: Redefined field \"%s\"\n",symbol->lineno,symbol->name);
+			if(error_search(15,symbol->lineno)==0)
+				printf("Error type 15 at Line %d: Redefined field \"%s\".\n",symbol->lineno,symbol->name);
 		}
 	}
 	if(s->childnum==3)
@@ -489,14 +579,16 @@ Exp* Exp_analysis(Node *s)
 					if(expl->lorr==VR){
 						//error 6
 						exp->type=NULL;
-						printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n", s->lineno);
+						if(error_search(6,s->lineno)==0)
+							printf("Error type 6 at Line %d: The left-hand side of an assignment must be a variable.\n", s->lineno);
 					}
 					else{
 						expr=Exp_analysis(s->child[2]);
 						if(type_equiv_detect(expl->type,expr->type)==0){
 							//error 5
 							exp->type==NULL;
-							printf("Error type 5 at Line %d: Type mismatched for assignment.\n",s->lineno);
+							if(error_search(5,s->lineno)==0)
+								printf("Error type 5 at Line %d: Type mismatched for assignment.\n",s->lineno);
 						}
 						else{
 							exp->type=expl->type;
@@ -509,7 +601,8 @@ Exp* Exp_analysis(Node *s)
 					expr=Exp_analysis(s->child[2]);
 					if(expl->type==NULL||expr->type==NULL||expl->type->kind!=VTINT||expr->type->kind!=VTINT){
 						//error 7
-						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
+						if(error_search(7,s->lineno)==0)
+							printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
@@ -525,7 +618,8 @@ Exp* Exp_analysis(Node *s)
 					expr=Exp_analysis(s->child[2]);
 					if((!(expl->type!=NULL&&(expl->type->kind==VTINT||expl->type->kind==VTFLOAT)))||(!(expr->type!=NULL&&(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)))||type_equiv_detect(expl->type,expr->type)==0){
 						//error 7
-						printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
+						if(error_search(7,s->lineno)==0)
+							printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
@@ -537,12 +631,14 @@ Exp* Exp_analysis(Node *s)
 					expr=Exp_analysis(s->child[2]);
 					if(expl->type==NULL||expl->type->kind!=VTARRAY){
 						//error 10
-						printf("Error type 10 at Line %d: \"%s\" is not an array\n",s->lineno,s->child[0]->child[0]->id_name);
+						if(error_search(10,s->lineno)==0)
+							printf("Error type 10 at Line %d: \"%s\" is not an array.\n",s->lineno,s->child[0]->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(expl->type==NULL||expr->type->kind!=VTINT){
 						//error 12
-						printf("Error type 12 at Line %d: \"%g\" is not an integer.\n",s->lineno,s->child[2]->child[0]->float_value);
+						if(error_search(12,s->lineno)==0)
+							printf("Error type 12 at Line %d: \"%g\" is not an integer.\n",s->lineno,s->child[2]->child[0]->float_value);
 						exp->type=NULL;
 					}
 					else{
@@ -553,14 +649,16 @@ Exp* Exp_analysis(Node *s)
 				case VDOT:
 					if(expl->type==NULL||expl->type->kind!=VTSTRUCT){
 						//error 13
-						printf("Error type 13 at Line %d: Illegal use of \".\".\n",s->lineno);
+						if(error_search(13,s->lineno)==0)
+							printf("Error type 13 at Line %d: Illegal use of \".\".\n",s->lineno);
 						exp->type=NULL;
 					}
 					else{
 						FieldList *fi=field_search(s->child[2]->id_name,expl->type);
 						if(fi==NULL){
 							//error 14
-							printf("Error type 14 at Line %d: Non-existent field \"%s\"\n",s->lineno,s->child[2]->id_name);
+							if(error_search(14,s->lineno)==0)
+								printf("Error type 14 at Line %d: Non-existent field \"%s\".\n",s->lineno,s->child[2]->id_name);
 							exp->type=NULL;
 						}
 						else{
@@ -581,7 +679,8 @@ Exp* Exp_analysis(Node *s)
 			expr=Exp_analysis(s->child[1]);
 			if(expr->type==NULL||!(expr->type->kind==VTINT||expr->type->kind==VTFLOAT)){
 				//error 7
-				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
+				if(error_search(7,s->lineno)==0)
+					printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
 			}
 			else{
@@ -593,7 +692,8 @@ Exp* Exp_analysis(Node *s)
 			expr=Exp_analysis(s->child[1]);
 			if(expr==NULL||expr->type->kind!=VTINT){
 				//error 7
-				printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
+				if(error_search(7,s->lineno)==0)
+					printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 				exp->type=NULL;
 			}
 			else{
@@ -607,7 +707,8 @@ Exp* Exp_analysis(Node *s)
 				case 1:
 					if(symbol==NULL){
 						//error 1
-						printf("Error type 1 at Line %d: Undefined variable \"%s\".\n",s->lineno,s->child[0]->id_name);
+						if(error_search(1,s->lineno)==0)
+							printf("Error type 1 at Line %d: Undefined variable \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -618,17 +719,20 @@ Exp* Exp_analysis(Node *s)
 				case 3:
 					if(symbol==NULL){
 						//error 2
-						printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
+						if(error_search(2,s->lineno)==0)
+							printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
 						//error 11
-						printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
+						if(error_search(11,s->lineno)==0)
+							printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->func->args!=NULL){
 						//error 9
-						printf("Error type 9 at Line %d: Function \"%s\" should not have arguments.\n",s->lineno,s->child[0]->id_name);
+						if(error_search(9,s->lineno)==0)
+							printf("Error type 9 at Line %d: Function \"%s\" should not have arguments.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -640,12 +744,14 @@ Exp* Exp_analysis(Node *s)
 					arglist=Args_analysis(s->child[2]);
 					if(symbol==NULL){
 						//error 2
-						printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
+						if(error_search(2,s->lineno)==0)
+							printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
 						//error 11
-						printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
+						if(error_search(11,s->lineno)==0)
+							printf("Error type 11 at Line %d: \"%s\" is not a function.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -662,7 +768,8 @@ Exp* Exp_analysis(Node *s)
 						if(ar1==NULL && ar1==NULL) pan=1;
 						if(pan==0){
 							//error 9
-							printf("Error type 9 at Line %d: Argument(s) is(are) incorrect for function \"%s\".\n",s->lineno,s->child[0]->id_name);
+							if(error_search(9,s->lineno)==0)
+								printf("Error type 9 at Line %d: Argument(s) is(are) incorrect for function \"%s\".\n",s->lineno,s->child[0]->id_name);
 							exp->type=NULL;
 						}
 						else{

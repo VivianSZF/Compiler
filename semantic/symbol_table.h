@@ -72,6 +72,7 @@ struct Symbolt
 	Stack *stack;
 	Symbolt *hash_pre;
 	Symbolt *hash_next;
+	Symbolt *stack_pre;
 	Symbolt *stack_next;
 };
 
@@ -89,9 +90,6 @@ Symbolele *stack_search(char *name, Stack *stack);
 Symbolele *hash_search(char *name);
 FieldList *field_search(char *name, Type *type);
 void insertToStack(Symbolele *symbol, Stack *stack);
-void insertVarToStack(Symbolele *symbol, Stack *stack);
-void insertStructToStack(Symbolele *symbol, Stack *stack);
-void insertParamsToFuncarg(Symbolele *symbol, Func *func);
 
 extern Symbolt *hash[SIZE];
 extern Stack *sta;
