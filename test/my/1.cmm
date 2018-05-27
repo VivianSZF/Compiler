@@ -2,7 +2,7 @@ struct Position
 {
 	int i,j,h;
 	int i=1;
-	int k=3;
+	int k=3+2+3;
 };
 
 int main()

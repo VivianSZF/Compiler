@@ -81,5 +81,8 @@ testo2:
 testo3:
 	./parser test/others/3.cmm
 
+testm1:
+	./parser test/my/1.cmm
+
 testall:
 	./parser test/compulsory/1.cmm test/compulsory/2.cmm test/compulsory/3.cmm test/compulsory/4.cmm test/compulsory/5.cmm test/compulsory/6.cmm test/compulsory/7.cmm test/compulsory/8.cmm test/compulsory/9.cmm test/compulsory/10.cmm test/compulsory/11.cmm test/compulsory/12.cmm test/compulsory/13.cmm test/compulsory/14.cmm test/compulsory/15.cmm test/compulsory/16.cmm test/compulsory/17.cmm test/others/1.cmm test/others/2.cmm test/others/3.cmm
