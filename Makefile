@@ -1,8 +1,8 @@
 lexical:
-	flex lexical_syntax/lexical.l
+	cd lexical_syntax && flex lexical.l
 
 syntax:
-	bison -d -v lexical_syntax/syntax.y
+	cd lexical_syntax && bison -d -v syntax.y
 
 parser:
 	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
@@ -11,13 +11,13 @@ clean:
 	rm -f parser
 
 lab1:
-	bison -d -v lexical_syntax/syntax.y
-	flex lexical_syntax/lexical.l
+	cd lexical_syntax && bison -d -v syntax.y
+	cd lexical_syntax && flex lexical.l
 	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c -lfl -ly -o parser
 
 lab2:
-	bison -d -v lexical_syntax/syntax.y
-	flex lexical_syntax/lexical.l
+	cd lexical_syntax && bison -d -v syntax.y
+	cd lexical_syntax && flex lexical.l
 	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
 
 
