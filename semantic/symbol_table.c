@@ -39,23 +39,6 @@ Symbolele* symbol_for_func(Func *func, char *name, int lineno)
 	return symbol;
 }
 
-Type* type_for_struct()
-{
-	Type *type=malloc(sizeof(Type));
-	type->kind=VTSTRUCT;
-	type->structure=NULL;
-}
-
-Type* type_for_array(Type *elem, int size)
-{
-	Type *type=malloc(sizeof(Type));
-	type->kind=VTARRAY;
-	type->array=malloc(sizeof(Array));
-	type->array->elem=elem;
-	type->array->size=size;
-	return type;
-}
-
 int type_equiv_detect(Type *t1,Type *t2)
 {
 	FieldList *f1,*f2;
@@ -88,6 +71,7 @@ int type_equiv_detect(Type *t1,Type *t2)
 				return 0;
 			break;
 		default:
+			printf("Error!\n");
 			break;
 	}	
 }

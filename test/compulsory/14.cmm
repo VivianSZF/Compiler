@@ -3,10 +3,9 @@ struct Position
 	float x, y;
 };
 
-int func(int a);
-
-int func(struct Position p);
-
 int main()
 {
+	struct Position p;
+	if (p.n == 3.7)
+		return 0;
 }

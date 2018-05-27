@@ -42,7 +42,6 @@ struct FieldList_
 struct Func
 {
 	Type *type;
-	int cnt;
 	int defordec;
 	struct Args
 	{
@@ -92,8 +91,6 @@ struct Stack
 uint32_t hash_pjw(char* name);
 Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno);
 Symbolele* symbol_for_func(Func *func, char *name, int lineno);
-Type* type_for_struct();
-Type* type_for_array(Type *elem, int size);
 int type_equiv_detect(Type *t1,Type *t2);
 Symbolele *stack_search(char *name, Stack *stack);
 Symbolele *hash_search(char *name);

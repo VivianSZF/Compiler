@@ -111,7 +111,7 @@ void ExtDef_analysis(Node *s)
 					CompSt_analysis(s->child[2],func);
 					break;
 				case VSEMI:
-					func=FunDec_analysis(s->child[1],type,VDEC);// change the chanshengshi
+					func=FunDec_analysis(s->child[1],type,VDEC);
 					break;
 				default:
 					printf("Error!\n");
@@ -129,7 +129,7 @@ void ExtDecList_analysis(Node *s, Type *type)
 	Symbolele *symbol=VarDec_analysis(s->child[0],type);
 	insertVarToStack(symbol,sta);
 	while(s->childnum==3)
-	{//???????????????? ==1???
+	{
 		s=s->child[2];
 		symbol=VarDec_analysis(s->child[0],type);
 		insertVarToStack(symbol,sta);
@@ -159,23 +159,25 @@ Type* Specifier_analysis(Node *s)
 
 Type* StructSpecifier_analysis(Node *s)
 {
-	Type *type,*type1;
+	Type *type;
 	Symbolele* symbol;
 	char *name;
 	switch(namemap(s->child[1]->name)){
 		case VOptTag:
-			type1=type_for_struct();
+			type=(Type*)malloc(sizeof(Type));
+			type->kind=VTSTRUCT;
+			type->structure=NULL;
 			name=(char *)malloc(strlen(s->child[1]->child[0]->id_name)+2);
 			*name='!';strcpy(name+1,s->child[1]->child[0]->id_name);
-			symbol=symbol_for_nonfunc(type1,name,s->lineno);
-			type=symbol->type;
+			symbol=symbol_for_nonfunc(type,name,s->lineno);
 			insertStructToStack(symbol,sta);
 			DefList_analysis(s->child[3],type);
 			break;
 		case VUnknown:
-			type1=type_for_struct();
-			symbol=symbol_for_nonfunc(type1,"NULL",s->lineno);
-			type=symbol->type;
+			type=(Type*)malloc(sizeof(Type));
+			type->kind=VTSTRUCT;
+			type->structure=NULL;
+			symbol=symbol_for_nonfunc(type,"NULL",s->lineno);
 			DefList_analysis(s->child[3],type);
 			break;
 		case VTag:
@@ -205,10 +207,18 @@ Symbolele* VarDec_analysis(Node *s, Type *type)
 			symbol=symbol_for_nonfunc(type,s->child[0]->id_name,s->lineno);
 			break;
 		case VVarDec:
-			type1=type_for_array(type,s->child[2]->int_value);
+			type1=(Type*)malloc(sizeof(Type));
+			type1->kind=VTARRAY;
+			type1->array=malloc(sizeof(Array));
+			type1->array->elem=type;
+			type1->array->size=s->child[2]->int_value;
 			s=s->child[0];
 			while(namemap(s->child[0]->name)==VVarDec){
-				type2=type_for_array(type1,s->child[2]->int_value);
+				type2=(Type*)malloc(sizeof(Type));
+				type2->kind=VTARRAY;
+				type2->array=malloc(sizeof(Array));
+				type2->array->elem=type1;
+				type2->array->size=s->child[2]->int_value;
 				type1=type2;
 				s=s->child[0];
 			}
@@ -592,7 +602,7 @@ Exp* Exp_analysis(Node *s)
 				exp->lorr=VR;
 			}
 			break;			
-		case VID://?????????????????????????????????????child
+		case VID:
 			symbol=hash_search(s->child[0]->id_name);
 			switch(s->childnum){
 				case 1:
@@ -609,7 +619,7 @@ Exp* Exp_analysis(Node *s)
 				case 3:
 					if(symbol==NULL){
 						//error 2
-						printf("Error type 12 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
+						printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
@@ -631,7 +641,7 @@ Exp* Exp_analysis(Node *s)
 					arglist=Args_analysis(s->child[2]);
 					if(symbol==NULL){
 						//error 2
-						printf("Error type 12 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
+						printf("Error type 2 at Line %d: Undefined function \"%s\".\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else if(symbol->funcornot==0){
