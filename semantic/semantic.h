@@ -21,7 +21,7 @@ int namemap(char *name);
 int error_search(int errortype, int lineno);
 void Program_analysis(Node *root);
 Intercodes* ExtDefList_analysis(Node *s);
-void ExtDef_analysis(Node *s);
+Intercodes* ExtDef_analysis(Node *s);
 void ExtDecList_analysis(Node *s, Type *type);
 Type* Specifier_analysis(Node *s);
 Type* StructSpecifier_analysis(Node *s);
@@ -29,15 +29,15 @@ Symbolele* VarDec_analysis(Node *s, Type *type);
 Func* FunDec_analysis(Node *s, Type *type, int defordec);
 Func* VarList_analysis(Node *s,Type *type);
 Symbolele* ParamDec_analysis(Node *s);
-void CompSt_analysis(Node *s, Func *func);
-void StmtList_analysis(Node *s, Type *type);
-void Stmt_analysis(Node *s,Type *type);
-void DefList_analysis(Node *s,Type *type);
-void Def_analysis(Node *s, Type *type);
-void DecList_analysis(Node *s,Type *type,Type *type1);
-void Dec_analysis(Node *s,Type *type,Type *type1);
+Intercodes* CompSt_analysis(Node *s, Func *func);
+Intercodes* StmtList_analysis(Node *s, Type *type);
+Intercodes* Stmt_analysis(Node *s,Type *type);
+Intercodes* DefList_analysis(Node *s,Type *type);
+Intercodes* Def_analysis(Node *s, Type *type);
+Intercodes* DecList_analysis(Node *s,Type *type,Type *type1);
+Intercodes* Dec_analysis(Node *s,Type *type,Type *type1);
 Exp* Exp_analysis(Node *s);
-Args *Args_analysis(Node *s);
+Args* Args_analysis(Node *s);
 
 
 #endif

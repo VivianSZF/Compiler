@@ -3,4 +3,6 @@
 
 #include "translate.h"
 
+extern int nvar,ntemp,nlabel;
+
 #endif

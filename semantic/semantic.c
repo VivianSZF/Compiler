@@ -111,7 +111,7 @@ void Program_analysis(Node *root)
 
 Intercodes* ExtDefList_analysis(Node *s)
 {	
-	Intercodes *in;
+	Intercodes *in=NULL;
 	while(s!=NULL)
 	{
 		in=combine_code(in,ExtDef_analysis(s->child[0]));
@@ -120,8 +120,11 @@ Intercodes* ExtDefList_analysis(Node *s)
 	return in;
 }
 
-void ExtDef_analysis(Node *s)
+Intercodes* ExtDef_analysis(Node *s)
 {
+	Intercodes *in=NULL;
+	Intercodes *in1=NULL;
+	Intercodes *in2=NULL;
 	Type *type=Specifier_analysis(s->child[0]);
 	Func *func;
 	switch(namemap(s->child[1]->name)){
@@ -134,7 +137,9 @@ void ExtDef_analysis(Node *s)
 			switch(namemap(s->child[2]->name)){
 				case VCompSt:
 					func=FunDec_analysis(s->child[1],type,VDEF);
-					CompSt_analysis(s->child[2],func);
+					in1=Func_translate(s->child[1],func);
+					in2=CompSt_analysis(s->child[2],func);
+					in=combine_code(in1,in2);
 					break;
 				case VSEMI:
 					func=FunDec_analysis(s->child[1],type,VDEC);
@@ -148,6 +153,7 @@ void ExtDef_analysis(Node *s)
 			printf("Error!\n");
 			break;	
 	}
+	return in;
 }
 
 void ExtDecList_analysis(Node *s, Type *type)
@@ -415,7 +421,7 @@ Symbolele* ParamDec_analysis(Node *s)
 	return symbol;
 }
 
-void CompSt_analysis(Node *s, Func *func)
+Intercodes* CompSt_analysis(Node *s, Func *func)
 {
 	Stack *stack=malloc(sizeof(Stack));
 	stack->firstele=NULL;
@@ -435,11 +441,15 @@ void CompSt_analysis(Node *s, Func *func)
 			}
 		}
 	}
-	DefList_analysis(s->child[1],NULL);
+	Intercodes *in=NULL;
+	Intercodes *in1=NULL;
+	Intercodes *in2=NULL;
+	in1=DefList_analysis(s->child[1],NULL);
 	if(func==NULL)
-		StmtList_analysis(s->child[2],NULL);
+		in2=StmtList_analysis(s->child[2],NULL);
 	else
-		StmtList_analysis(s->child[2],func->type);
+		in2=StmtList_analysis(s->child[2],func->type);
+	in=combine_code(in1,in2);
 	Stack *stack1=sta;
 	sta=sta->next;
 	for(Symbolt *sbt=stack1->firstele,*ne;sbt!=NULL;sbt=ne)
@@ -453,23 +463,29 @@ void CompSt_analysis(Node *s, Func *func)
 		if(sbt!=NULL) free(sbt);
 	}
 	free(stack1);
+	return in;
 }
 
-void StmtList_analysis(Node *s, Type *type)
+Intercodes* StmtList_analysis(Node *s, Type *type)
 {
+	Intercodes *in=NULL;
 	while(s!=NULL)
 	{
-		Stmt_analysis(s->child[0],type);
+		in=combine_code(in,Stmt_analysis(s->child[0],type));
 		s=s->child[1];
 	}
+	return in;
 }
 
 void Stmt_analysis(Node *s,Type *type)
 {
 	Type *type1;
+	Intercodes *in=NULL;
+	Intercodes *in1,*in2,*in3;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
 			Exp_analysis(s->child[0]);
+			in1=Exp_translate();
 			break;
 		case VCompSt:
 			CompSt_analysis(s->child[0],NULL);

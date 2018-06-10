@@ -1,6 +1,10 @@
 #ifndef __TRANSLATE_H_
 #define __TRANSLATE_H_
 
+#include "../lexical_syntax/treeop.h"
+#include "../semantic/semantic.h"
+#include "intercode.h"
+
 typedef Operand Operand;
 typedef Intercode Intercode;
 typedef Operands Operands;
@@ -12,14 +16,14 @@ struct Operand{
 		int value;
 		char *name;
 	};
-	int num;
+	int n;
 };
 
 struct Intercode{
 	enum{ILABEL,IFUNC,IASSIGN,IADD,ISUB,IMUL,IDIV,ILEA,ILD,IST,IJMP,IJCC,IRETURN,IDEC,IARG,ICALL,IPARAM,IREAD,IWRITE}kind;
-	Operand *op1,*op2,*op3;
+	Operand *re,*op1,*op2;
 	char *relop;
-	int size,type;
+	
 };
 
 struct Operands{
