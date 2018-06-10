@@ -2,6 +2,8 @@
 #define __SEMANTIC_H_
 
 #include "../lexical_syntax/treeop.h"
+#include "../intercode/intercodes.h"
+#include "../intercode/translate.h"
 #include "symbol_table.h"
 
 enum {
@@ -18,7 +20,7 @@ int errortable[19][500];
 int namemap(char *name);
 int error_search(int errortype, int lineno);
 void Program_analysis(Node *root);
-void ExtDefList_analysis(Node *s);
+Intercodes* ExtDefList_analysis(Node *s);
 void ExtDef_analysis(Node *s);
 void ExtDecList_analysis(Node *s, Type *type);
 Type* Specifier_analysis(Node *s);

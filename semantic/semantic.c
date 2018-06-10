@@ -4,7 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 int struct_varassign;
+Intercodes *in_head;
 
 int namemap(char *name)
 {
@@ -95,7 +97,8 @@ void Program_analysis(Node *root)
 	stack->firstele=NULL;	
 	stack->next=sta;
 	sta=stack;
-	ExtDefList_analysis(root->child[0]);
+	in_head=NULL;
+	in_head=ExtDefList_analysis(root->child[0]);
 	for(Symbolt *p=sta->firstele;p!=NULL;p=p->stack_next)
 	{
 		if(p->s->funcornot==1 && p->s->func->defordec==VDEC){
@@ -106,13 +109,15 @@ void Program_analysis(Node *root)
 	}
 }
 
-void ExtDefList_analysis(Node *s)
+Intercodes* ExtDefList_analysis(Node *s)
 {	
+	Intercodes *in;
 	while(s!=NULL)
 	{
-		ExtDef_analysis(s->child[0]);
+		in=combine_code(in,ExtDef_analysis(s->child[0]));
 		s=s->child[1];
 	}
+	return in;
 }
 
 void ExtDef_analysis(Node *s)
