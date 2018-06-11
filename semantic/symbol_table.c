@@ -25,6 +25,7 @@ Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno)
 	symbol->funcornot=0;
 	symbol->lineno=lineno;
 	symbol->type=type;
+	symbol->op=Operand_var();
 	return symbol;
 }
 
@@ -36,6 +37,7 @@ Symbolele* symbol_for_func(Func *func, char *name, int lineno)
 	symbol->funcornot=1;
 	symbol->lineno=lineno;
 	symbol->func=func;
+	symbol->op=NULL;
 	return symbol;
 }
 

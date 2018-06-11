@@ -3,6 +3,7 @@
 
 #include "../lexical_syntax/treeop.h"
 #include "../semantic/semantic.h"
+
 #include "intercode.h"
 
 typedef Operand Operand;
@@ -11,7 +12,7 @@ typedef Operands Operands;
 typedef Intercodes Intercodes;
 
 struct Operand{
-	enum{OVAR,OCONSTANT,OTEMP,OLABEL,OFUNC,OAD,OST} kind;
+	enum{OVAR,OCONSTANT,OTEMP,OLABEL,OFUNC,OAD,OST,ONULL} kind;
 	union{
 		int value;
 		char *name;
@@ -22,7 +23,7 @@ struct Operand{
 struct Intercode{
 	enum{ILABEL,IFUNC,IASSIGN,IADD,ISUB,IMUL,IDIV,ILEA,ILD,IST,IIF,IRETURN,IGOTO,IDEC,IARG,ICALL,IPARAM,IREAD,IWRITE}kind;
 	Operand *re,*op1,*op2;
-	int relop;
+	int relop,size;
 	
 };
 

@@ -83,6 +83,18 @@ Intercode* Intercode_3(Operand *re,Operand *op1,Operand *op2, int kind)
 	return c;	
 }
 
+Intercode* Intercode_dec(char *arr, int size)
+{
+	Intercode *c=malloc(sizeof(Intercode));
+	c->kind=IDEC;
+	Operand *op=malloc(sizeof(Operand));
+	op->kind=ONULL;
+	op->name=arr;
+	c->re=op;
+	c->size=size;
+	return c;
+}
+
 Intercode* Intercode_if(Operand *re,Operand *op1, Operand *op2, int relop)
 {
 	Intercode *c=malloc(sizeof(Intercode));

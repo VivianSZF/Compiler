@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #define SIZE 0x3fff
+#include "../intercode/translate.h"
 
 typedef struct Type_ Type;
 typedef struct FieldList_ FieldList;
@@ -60,6 +61,7 @@ struct Symbolele
 	char *name;
 	int funcornot;
 	int lineno;
+	Operand *op;
 	union{
 		Type *type;
 		Func *func;

@@ -197,6 +197,7 @@ Intercodes* Cond_translate(Node *s, Operand *label_true, Operand *label_false)
 	Intercodes *in=NULL,*in1,*in2,*in3,*in4;
 	Operand *op1,*op2,*label1,*opc0;
 	int relop;
+	Intercode *c;
 	switch(namemap(s->name)){
 		case VEXP:
 			switch(namemap(s->child[1]->name)){
@@ -245,5 +246,42 @@ Intercodes* Cond_translate(Node *s, Operand *label_true, Operand *label_false)
 			break;	
 	}
 	return in;
+}
+
+int get_size(Type *type)
+{
+	int size=0;
+	if(type->kind==VTINT||type->kind==VTFLOAT)
+		size=4;
+	else if(type->kind==VTARRAY)
+		size=get_size(type->array->elem)*(type->array->size);
+	else{
+		FieldList *f=type->structure;
+		while(f!=NULL){
+			size=size+get_size(f->s->type);
+			f=f->next;
+		}
+	}
+	return size;
+}
+
+Intercodes* VarDec_translate(Node *s, Type *type)
+{
+	Intercodes *in=NULL;
+	Intercode *c;
+	Symbolele *symbol;
+	if(namemap(s->child[0]->name)==VID){
+		if(type!=NULL&&type->kind==VTSTRUCT){
+			c=Intercode_dec(s->child[0]->id_name,get_size(type));
+			in=prepare_code(c);
+		}
+	}else if(namemap(s->child[0]->name)==VVARDEC){
+		while(namemap(s->child[0]->name)==VVARDEC)
+			s=s->child[0];
+		symbol=hash_search(s->child[0]->id_name);
+		c=Intercode_dec(s->child[0]->id_name,get_size(symbol->type));	
+		in=prepare_code(c);
+	}	
+	return c;
 }
 

@@ -477,18 +477,20 @@ Intercodes* StmtList_analysis(Node *s, Type *type)
 	return in;
 }
 
-void Stmt_analysis(Node *s,Type *type)
+Intercodes* Stmt_analysis(Node *s,Type *type)
 {
 	Type *type1;
 	Intercodes *in=NULL;
-	Intercodes *in1,*in2,*in3;
+	Intercodes *in1,*in2,*in3,*in4,*in5,*in6,*in7;
+	Operand *op=NULL,*label1,*label2,*label3;
+	
 	switch(namemap(s->child[0]->name)){
 		case VExp:
 			Exp_analysis(s->child[0]);
-			in1=Exp_translate();
+			in=Exp_translate(s->child[0],&op);
 			break;
 		case VCompSt:
-			CompSt_analysis(s->child[0],NULL);
+			in=CompSt_analysis(s->child[0],NULL);
 			break;
 		case VRETURN:
 			type1=Exp_analysis(s->child[1])->type;
@@ -497,6 +499,11 @@ void Stmt_analysis(Node *s,Type *type)
 				if(error_search(8,s->lineno)==0)
 					printf("Error type 8 at Line %d: Type mismatched for return.\n", s->lineno);
 			}
+			op=Operand_temp();
+			in1=Exp_translate(s->child[1],&op);
+			c=Intercode_1(op,IRETURN);
+			in2=prepare_code(c);
+			in=combine_code(in1,in2);
 			break;
 		case VIF:
 			type1=Exp_analysis(s->child[2])->type;
@@ -505,9 +512,33 @@ void Stmt_analysis(Node *s,Type *type)
 				if(error_search(7,s->lineno)==0)
 					printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 			}
-			Stmt_analysis(s->child[4],type);
+			in3=Stmt_analysis(s->child[4],type);
 			if(s->childnum==7){
-				Stmt_analysis(s->child[6],type);
+				in6=Stmt_analysis(s->child[6],type);
+			}
+			if(s->childnum==5){
+				label1=Operand_label();
+				label2=Operand_label();
+				in1=Cond_translate(s->child[2],label1,label2);
+				c=Intercode_1(label1,ILABEL);
+				in2=prepare_code(c);
+				c=Intercode_1(label2,ILABEL);
+				in4=prepare_code(c);
+				in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
+			}else if(s->childnum==7){
+				label1=Operand_label();
+				label2=Operand_label();
+				label3=Operand_label();
+				in1=Cond_translate(s->child[2],label1,label2);
+				c=Intercode_1(label1,ILABEL);
+				in2=prepare_code(c);
+				c=Intercode_1(label3,IGOTO);
+				in4=prepare_code(c);
+				c=Intercode_1(label2,ILABEL);
+				in5=prepare_code(c);
+				c=Intercode_1(label3,ILABEL);
+				in7=prepare_code(c);
+				in=combine_code(in1,combine_code(in2,combine_code(in3,combine_code(in4,combine_code(in5,combine_code(in6,in7))))));
 			}
 			break;
 		case VWHILE:
@@ -517,42 +548,65 @@ void Stmt_analysis(Node *s,Type *type)
 				if(error_search(7,s->lineno)==0)
 					printf("Error type 7 at Line %d:Type mismatched for operands.\n",s->lineno);
 			}
-			Stmt_analysis(s->child[4],type);
+			label1=Operand_label();
+			label2=Operand_label();
+			label3=Operand_label();
+			c=Intercode_1(label1,ILABEL);
+			in1=prepare_code(c);
+			in2=Cond_translate(s->child[2],label2,label3);
+			c=Intercode_1(label2,ILABEL);
+			in3=prepare_code(c);
+			in4=Stmt_analysis(s->child[4],type);
+			c=Intercode_1(label1,IGOTO);
+			in5=prepare_code(c);
+			c=Intercode_1(label3,ILABEL);
+			in6=prepare_code(c);
+			in=combine_code(in1,combine_code(in2,combine_code(in3,combine_code(in4,combine_code(in5,in6)))));
 			break;
 		default:
 			printf("Error!\n");
 			break;
 	}
+	return in;
 }
 
-void DefList_analysis(Node *s,Type *type)
+Intercodes* DefList_analysis(Node *s,Type *type)
 {
+	Intercodes *in=NULL;
 	while(s!=NULL)
 	{
-		Def_analysis(s->child[0],type);
+		in=combine_code(in,Def_analysis(s->child[0],type));
 		s=s->child[1];
 	}
+	return in;
 }
 
-void Def_analysis(Node *s, Type *type)
+Intercodes* Def_analysis(Node *s, Type *type)
 {
+	Intercodes *in=NULL;
 	Type *type1=Specifier_analysis(s->child[0]);
-	DecList_analysis(s->child[1],type,type1);
+	in=DecList_analysis(s->child[1],type,type1);
+	return in;
 }
 
-void DecList_analysis(Node *s,Type *type,Type *type1)
+Intercodes* DecList_analysis(Node *s,Type *type,Type *type1)
 {
-	Dec_analysis(s->child[0],type,type1);
+	Intercodes *in=NULL;
+	in=Dec_analysis(s->child[0],type,type1);
 	while(s->childnum==3)
 	{
 		s=s->child[2];
-		Dec_analysis(s->child[0],type,type1);
+		in=combine_code(in,Dec_analysis(s->child[0],type,type1));
 	}
+	return in;
 }
 
-void Dec_analysis(Node *s,Type *type,Type *type1)
+Intercodes* Dec_analysis(Node *s,Type *type,Type *type1)
 {
+	Intercodes *in=NULL,*in1,*in2;
 	Symbolele* symbol=VarDec_analysis(s->child[0],type1);
+	Operand *op;
+	Intercode *c;
 	if(type==NULL){
 		if(stack_search(symbol->name,sta)==NULL)
 		{
@@ -583,6 +637,7 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 			if(error_search(15,symbol->lineno)==0)
 				printf("Error type 15 at Line %d: Redefined field \"%s\".\n",symbol->lineno,symbol->name);
 		}
+		in=VarDec_translate(s->child[0],type1);
 	}
 	if(s->childnum==3)
 	{	
@@ -592,7 +647,13 @@ void Dec_analysis(Node *s,Type *type,Type *type1)
 				printf("Error type 15 at Line %d: Invalid assignment to field \"%s\".\n",symbol->lineno,symbol->name);	
 		}
 		Exp_analysis(s->child[2]);
+		op=Operand_temp();
+		in1=Exp_translate(s->child[2],&op);
+		c=Intercode_2(symbol->op,op,IASSIGN);
+		in2=prepare_code(c);
+		in=combine_code(in,combine_code(in1,in2));
 	}
+	return in;
 }
 
 Exp* Exp_analysis(Node *s)
