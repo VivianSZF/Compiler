@@ -36,7 +36,7 @@ WS		    [ \t]+
 ";"		    {yylval.node=create_node(TUN,"SEMI",yylineno,NULL);return SEMI;}
 ","		    {yylval.node=create_node(TUN,"COMMA",yylineno,NULL);return COMMA;}
 "="		    {yylval.node=create_node(TUN,"ASSIGNOP",yylineno,NULL);return ASSIGNOP;}
-{RELOP}		{yylval.node=create_node(TUN,"RELOP",yylineno,NULL);return RELOP;}
+{RELOP}		{yylval.node=create_node(TUN,"RELOP",yylineno,yytext);return RELOP;}
 "+"		    {yylval.node=create_node(TUN,"PLUS",yylineno,NULL);return PLUS;}
 "-"		    {yylval.node=create_node(TUN,"MINUS",yylineno,NULL);return MINUS;}
 "*"		    {yylval.node=create_node(TUN,"STAR",yylineno,NULL);return STAR;}

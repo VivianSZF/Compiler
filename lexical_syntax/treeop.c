@@ -120,6 +120,27 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
                 printf("Error type A at Line %d: Illegal floating point number \'%s\'.\n", lineno, value);
             }
             break;
+		case TUN:
+			if(value!=NULL){
+				if(value[0]=='<'){
+					if(value[1]=='='){
+						newnode->relop=RLE;
+					}else{
+						newnode->relop=RLT;
+					}
+				}else if(value[0]=='='){
+					newnode=>relop=RE;
+				}else if(value[0]=='>'){
+					if(value[1]=='='){
+						newnode->relop=RGE;
+					}else{
+						newnode->relop=RGT;
+					}
+				}else if(value[0]=='!'){
+					newnode->relop=RNE;
+				}
+			}
+			break;
         default:
             break;
     }    

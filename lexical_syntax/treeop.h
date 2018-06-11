@@ -2,6 +2,7 @@
 #define __TREEOP_H__
 
 enum{TID,TTYPE,TINT,TFLOAT,TUN,TTOKEN};
+enum{RLT,RLE,RE,RGT,RGE,RNE};
 #define type_int 0
 #define type_float 1
 
@@ -16,6 +17,7 @@ struct Node{
         int type;
         int int_value;
         float float_value;
+		int relop;
     }; 
 };
 

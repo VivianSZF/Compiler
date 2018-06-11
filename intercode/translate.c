@@ -192,3 +192,58 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 	return in;
 }
 
+Intercodes* Cond_translate(Node *s, Operand *label_true, Operand *label_false)
+{
+	Intercodes *in=NULL,*in1,*in2,*in3,*in4;
+	Operand *op1,*op2,*label1,*opc0;
+	int relop;
+	switch(namemap(s->name)){
+		case VEXP:
+			switch(namemap(s->child[1]->name)){
+				case VRELOP:
+					op1=Operand_temp();
+					op2=Operand_temp();
+					in1=Exp_translate(s->child[0],&op1);
+					in2=Exp_translate(s->child[2],&op2);
+					relop=s->child[1]->relop;
+					c=Intercode_if(op1,op2,label_true,relop);
+					in3=prepare_code(c);
+					c=Intercode_1(label_false,IGOTO);
+					in4=prepare_code(c);
+					in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
+					break;
+				case VAND:
+					label1=Operand_label();
+					in1=Cond_translate(s->child[0],label1,label_false);
+					c=Intercode_1(label1,ILABEL);					
+					in2=prepare_code(c);
+					in3=Cond_translate(s->child[2],label_true,label_false);
+					in=combine_code(in1,combine_code(in2,in3));
+					break;
+				case VOR:
+					label1=Operand_label();
+					in1=Cond_translate(s->child[0],label_true,label1);
+					c=Intercode_1(label1,ILABEL);					
+					in2=prepare_code(c);
+					in3=Cond_translate(s->child[2],label_true,label_false);
+					in=combine_code(in1,combine_code(in2,in3));
+					break;					
+			}
+			break;
+		case VNOT:
+			in=Cond_translate(s->child[1],label_false,label_true);
+			break;
+		default:
+			op1=Operand_temp();
+			in1=Exp_translate(s,&op1);
+			opc0=Operand_const0();
+			c=Intercode_if(op1,opc0,label_true,RNE);
+			in2=prepare_code(c);
+			c=Intercode_1(label_false,IGOTO);
+			in3=prepare_code(c);
+			in=combine_code(in1,combine_code(in2,in3));
+			break;	
+	}
+	return in;
+}
+

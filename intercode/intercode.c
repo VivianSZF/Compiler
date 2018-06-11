@@ -81,7 +81,18 @@ Intercode* Intercode_3(Operand *re,Operand *op1,Operand *op2, int kind)
 	c->op1=op1;
 	c->op2=op2;
 	return c;	
-]
+}
+
+Intercode* Intercode_if(Operand *re,Operand *op1, Operand *op2, int relop)
+{
+	Intercode *c=malloc(sizeof(Intercode));
+	c->kind=IIF;
+	c->relop=relop;
+	c->re=re;
+	c->op1=op1;
+	c->op2=op2;
+	return c;
+}
 
 Operand* Operand_constant(int value)
 {
