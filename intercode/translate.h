@@ -11,7 +11,7 @@ typedef Operands Operands;
 typedef Intercodes Intercodes;
 
 struct Operand{
-	enum{OVAR,OCONSTANT,OTEMP,OLABEL,OFUNC,ONULL} kind;
+	enum{OVAR,OCONSTANT,OTEMP,OLABEL,OFUNC,OAD,OST} kind;
 	union{
 		int value;
 		char *name;
