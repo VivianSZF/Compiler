@@ -77,6 +77,33 @@ int error_search(int errortype, int lineno)
 	return 0;
 }
 
+void add_read()
+{
+	Func *func=malloc(sizeof(Func));
+	Type *type=malloc(sizeof(Type));
+	type->kind=VTINT;
+	func->type=type;
+	func->defordec=VDEF;
+	Symbolele* symbol=symbol_for_func(func,"read",-1);
+	insertToStack(symbol,sta);	
+}
+
+void add_write()
+{
+	Func *func=malloc(sizeof(Func));
+	Type *type=malloc(sizeof(Type));
+	type->kind=VTINT;
+	func->type=type;
+	func->defordec=VDEF;
+	Symbolele *symbol=symbol_for_nonfunc(type,"writearg",-1);
+	Args *ar=malloc(sizeof(Args));
+	ar->a=symbol;
+	ar->next=NULL;
+	func->args=ar;
+	Symbolele *symbol_func=symbol_for_func(func,"write",-1);
+	insertToStack(symbol_func,sta);
+}
+
 void Program_analysis(Node *root)
 {
 	int i;
@@ -97,6 +124,8 @@ void Program_analysis(Node *root)
 	stack->firstele=NULL;	
 	stack->next=sta;
 	sta=stack;
+	add_read();
+	add_write();
 	in_head=NULL;
 	in_head=ExtDefList_analysis(root->child[0]);
 	for(Symbolt *p=sta->firstele;p!=NULL;p=p->stack_next)
@@ -483,7 +512,7 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 	Intercodes *in=NULL;
 	Intercodes *in1,*in2,*in3,*in4,*in5,*in6,*in7;
 	Operand *op=NULL,*label1,*label2,*label3;
-	
+	Intercode *c;
 	switch(namemap(s->child[0]->name)){
 		case VExp:
 			Exp_analysis(s->child[0]);

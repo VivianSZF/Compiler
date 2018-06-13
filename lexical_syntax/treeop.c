@@ -129,7 +129,7 @@ Node* create_node(int ntype, char* name, int lineno, char* value)
 						newnode->relop=RLT;
 					}
 				}else if(value[0]=='='){
-					newnode=>relop=RE;
+					newnode->relop=RE;
 				}else if(value[0]=='>'){
 					if(value[1]=='='){
 						newnode->relop=RGE;

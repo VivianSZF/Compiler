@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #define SIZE 0x3fff
-#include "../intercode/translate.h"
+
 
 typedef struct Type_ Type;
 typedef struct FieldList_ FieldList;
@@ -55,6 +55,9 @@ struct Exp
 	Type *type;
 	int lorr;
 };
+
+#include "../intercode/translate.h"
+
 
 struct Symbolele
 {

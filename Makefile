@@ -5,7 +5,7 @@ syntax:
 	cd lexical_syntax && bison -d -v syntax.y
 
 parser:
-	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c -std=c99 -w -lfl -ly -o parser
 
 clean:
 	rm -f parser

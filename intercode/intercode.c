@@ -5,8 +5,9 @@
 nvar=0;
 ntemp=0;
 nlabel=0;
+const char* Relop[]={"<","<=","=",">",">=","!="};
 
-void combine_code(Intercodes *in1,Intercodes *in2)
+Intercodes* combine_code(Intercodes *in1,Intercodes *in2)
 {
 	if(in1==NULL)return in2;
 	if(in2==NULL)return in1;
@@ -16,6 +17,7 @@ void combine_code(Intercodes *in1,Intercodes *in2)
 	}
 	p->next=in2;
 	in2->pre=p;
+	return p;
 }
 
 Operands* combine_ops(Operand *op, Operands *ops)
@@ -28,7 +30,7 @@ Operands* combine_ops(Operand *op, Operands *ops)
 	return ops1;
 }
 
-Intercodes* prepare_intercode(Intercode *c)
+Intercodes* prepare_code(Intercode *c)
 {
 	if(c==NULL)return NULL;
 	Intercodes *in=malloc(sizeof(Intercodes));
@@ -141,7 +143,7 @@ Operand* Operand_label()
 	return op;
 }
 
-Operand* Operand_char(char *name)
+Operand* Operand_func(char *name)
 {
 	Operand* op=malloc(sizeof(Operand));
 	op->name=name;//????
@@ -153,7 +155,7 @@ Operand* Operand_ad(char *name)
 {
 	Operand* op=malloc(sizeof(Operand));
 	op->kind=OAD;
-	op->name=name
+	op->name=name;
 	return op;
 }
 
@@ -200,4 +202,55 @@ char* generate_name(Operand *op)
 		sprintf(name,"*%s",op->name);	
 	}
 	return name;	
+}
+
+void print_Intercodes(Intercodes *head)
+{
+	if(head==NULL)
+		return;
+	Intercodes *t=head;
+	Intercode *c;
+	int k=0;
+	while(t!=NULL)
+	{
+		c=t->intercode;
+		k=c->kind;
+		if(k==ILABEL)
+			printf("LABEL %s :\n",generate_name(c->re));
+		else if(k==IFUNC)
+			printf("FUNCTION %s :\n",generate_name(c->re));
+		else if(k==IASSIGN)
+			printf("%s := %s\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IADD)
+			printf("%s := %s + %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+		else if(k==ISUB)
+			printf("%s := %s - %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+		else if(k==IMUL)
+			printf("%s := %s * %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+		else if(k==IDIV)
+			printf("%s := %s / %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+		else if(k==IAD)	
+			printf("%s := &%s\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IST)
+			printf("%s := *%s\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IIF)
+			printf("IF %s %s %s GOTO %s\n",generate_name(c->op1),Relop[c->relop],generate_name(c->op2),generate_name(c->re));
+		else if(k==IRETURN)
+			printf("RETURN %s\n", generate_name(c->re));
+		else if(k==IGOTO)
+			printf("GOTO %s\n",generate_name(c->re));
+		else if(k==IDEC)
+			printf("DEC %s %d\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IARG)
+			printf("ARG %s\n",generate_name(c->re));
+		else if(k==ICALL)
+			printf("%s := CALL %s\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IPARAM)
+			printf("PARAM %s\n",generate_name(c->re));
+		else if(k==IREAD)
+			printf("READ %s\n",generate_name(c->re));
+		else if(k==IWRITE)
+			printf("WRITE %s\n",generate_name(c->re));
+		t=t->next;
+	}	
 }

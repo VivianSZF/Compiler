@@ -2,7 +2,7 @@
 #define __SEMANTIC_H_
 
 #include "../lexical_syntax/treeop.h"
-#include "../intercode/intercodes.h"
+#include "../intercode/intercode.h"
 #include "../intercode/translate.h"
 #include "symbol_table.h"
 
