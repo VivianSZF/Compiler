@@ -28,7 +28,7 @@ int main(int argc, char** argv){
 		mark=-1;
 		errorlineno=-1;
 		yylineno=1;
-
+		
 		yyparse();
 		if(errornot==0){
 			//preorderprint(root,0);

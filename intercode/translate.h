@@ -36,9 +36,9 @@ struct Intercodes{
 #include "../semantic/symbol_table.h"
 
 Intercodes* Func_translate(Node *s, Func *func);
-Intercodes* Args_translate(Node *s, Operands *ops);
-Intercodes* Exp_translate(Node *s, Operand *op);
-Intercodes* AS_translate(Node *s, Type *type, Operand *op);
+Intercodes* Args_translate(Node *s, Operands **ops);
+Intercodes* Exp_translate(Node *s, Operand **op);
+Intercodes* AS_translate(Node *s, Operand **op, Type **type);
 Intercodes* Cond_translate(Node *s, Operand *label_true, Operand *label_false);
 int get_size(Type *type);
 int get_field_offset(char *name, Type *type);

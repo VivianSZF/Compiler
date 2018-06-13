@@ -8,6 +8,7 @@
 int struct_varassign;
 Intercodes *in_head;
 
+
 int namemap(char *name)
 {
 	if (strcmp(name,"INT")==0) return VINT;
@@ -107,6 +108,9 @@ void add_write()
 void Program_analysis(Node *root)
 {
 	int i;
+//	nvar=0;
+//	ntemp=0;
+//	nlabel=0;
 	memset(errortable,0,sizeof(errortable));
 	struct_varassign=0;
 	for(i=0;i<SIZE;i++)
@@ -126,7 +130,7 @@ void Program_analysis(Node *root)
 	sta=stack;
 	add_read();
 	add_write();
-	in_head=NULL;
+	in_head=NULL; 
 	in_head=ExtDefList_analysis(root->child[0]);
 	for(Symbolt *p=sta->firstele;p!=NULL;p=p->stack_next)
 	{
@@ -157,7 +161,7 @@ Intercodes* ExtDef_analysis(Node *s)
 	Type *type=Specifier_analysis(s->child[0]);
 	Func *func;
 	switch(namemap(s->child[1]->name)){
-		case VExtDecList:
+		case VExtDecList:			
 			ExtDecList_analysis(s->child[1],type);
 			break;
 		case VSEMI:
@@ -514,9 +518,9 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 	Operand *op=NULL,*label1,*label2,*label3;
 	Intercode *c;
 	switch(namemap(s->child[0]->name)){
-		case VExp:
+		case VExp:			
 			Exp_analysis(s->child[0]);
-			in=Exp_translate(s->child[0],&op);
+			in=Exp_translate(s->child[0],&op);printf("hre\n");
 			break;
 		case VCompSt:
 			in=CompSt_analysis(s->child[0],NULL);

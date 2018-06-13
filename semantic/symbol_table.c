@@ -2,6 +2,7 @@
 #include "symbol_table.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../intercode/intercode.h"
 
 Symbolt *hash[SIZE];
 Stack *sta;

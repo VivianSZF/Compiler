@@ -2,6 +2,8 @@
 #include "intercode.h"
 #include "../semantic/semantic.h"
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 //extern Intercodes* combine_code(Intercodes *in1,Intercodes *in2);
@@ -34,59 +36,60 @@ Intercodes* Func_translate(Node *s, Func *func)
 	return in;
 }
 
-Intercodes* Args_translate(Node *s, Operands *ops)
+Intercodes* Args_translate(Node *s, Operands **ops)
 {
 	Intercodes *in=NULL,*in1,*in2;
-	Operand *op1;
+	Operand *op1=NULL;
 	switch(s->childnum){
 		case 1:
 			op1=Operand_temp();
 			in1=Exp_translate(s->child[0],&op1);
-			ops=combine_ops(op1,ops);//???
+			*ops=combine_ops(op1,*ops);printf("1\n");
 			break;
 		case 2:
 			op1=Operand_temp();
 			in1=Exp_translate(s->child[0],&op1);
-			ops=combine_ops(op1,ops);
-			in2=Args_translate(s->child[2],&ops);
+			*ops=combine_ops(op1,*ops);
+			in2=Args_translate(s->child[2],ops);
 			in=combine_code(in1,in2);
 			break;
 	}
 	return in;
 }
 
-Intercodes* Exp_translate(Node *s, Operand *op)
+Intercodes* Exp_translate(Node *s, Operand **op)
 {
 	Intercodes *in=NULL,*in1,*in2,*in3,*in4;
 	Intercode *c;
-	Operand *op1,*op2,*op3,*opc0,*opc1;
+	Operand *op1=NULL,*op2=NULL,*op3=NULL,*opc0,*opc1;
 	Operands *ops=NULL;
 	char *name;
 	Type *type=NULL;
 	Symbolele *symbol;
 	switch(namemap(s->child[0]->name)){
 		case VINT:
-			op=Operand_constant(s->child[0]->int_value);
+			*op=Operand_constant(s->child[0]->int_value);
 			break;
 		case VID:
 			symbol=hash_search(s->child[0]->id_name);
 			switch(s->childnum){
 				case 1:
-					op=Operand_var();
+					*op=Operand_var();
 					break;
 				case 3:
 					if(strcmp(symbol->name,"read")==0){
-						c=Intercode_1(op,IREAD);
+						c=Intercode_1(*op,IREAD);
 						in=prepare_code(c);
 					}
 					else{
 						op1=Operand_func(symbol->name);
-						c=Intercode_2(op,op1,ICALL);
+						c=Intercode_2(*op,op1,ICALL);
 						in=prepare_code(c);
 					}
 					break;	
-				case 4:
-					in1=Args_translate(s->child[2],&ops);
+				case 4:printf("2\n");
+					in1=Args_translate(s->child[2],&ops);printf("1\n");
+					if(ops==NULL) printf("wronghere\n");
 					if(strcmp(symbol->name,"write")==0){
 						c=Intercode_1(ops->op,IWRITE);
 						in2=prepare_code(c);
@@ -100,7 +103,7 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 							in2=combine_code(in2,in3);
 						}
 						op1=Operand_func(symbol->name);
-						c=Intercode_2(op,op1,ICALL);
+						c=Intercode_2(*op,op1,ICALL);
 						in3=prepare_code(c);
 						in=combine_code(in1,combine_code(in2,in3));
 					}
@@ -120,20 +123,20 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 						in2=Exp_translate(s->child[2],&op2);
 						c=Intercode_2(op1,op2,IASSIGN);
 						in3=prepare_code(c);
-						c=Intercode_2(op,op1,IASSIGN);
+						c=Intercode_2(*op,op1,IASSIGN);
 						in4=prepare_code(c);
 						in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 					}
 					else{
 						op1=Operand_temp();
-						in1=AS_translate(s->child[0],&op, &type);
+						in1=AS_translate(s->child[0],&op1, &type);
 						name=generate_name(op1);
 						op2=Operand_st(name);
 						op3=Operand_temp();
 						in2=Exp_translate(s->child[2],&op3);
 						c=Intercode_2(op2,op3,IASSIGN);
 						in3=prepare_code(c);
-						c=Intercode_2(op,op2,IASSIGN);
+						c=Intercode_2(*op,op2,IASSIGN);
 						in4=prepare_code(c);
 						in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 					}
@@ -145,12 +148,12 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 					op2=Operand_label();
 					opc0=Operand_const0();
 					opc1=Operand_const1();
-					c=Intercode_2(op,opc0,IASSIGN);
+					c=Intercode_2(*op,opc0,IASSIGN);
 					in1=prepare_code(c);
 					in2=Cond_translate(s,op1,op2);
 					c=Intercode_1(op1,ILABEL);
 					in3=prepare_code(c);
-					c=Intercode_2(op,opc1,IASSIGN);
+					c=Intercode_2(*op,opc1,IASSIGN);
 					in4=prepare_code(c);
 					in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 					break;
@@ -162,7 +165,7 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 					op2=Operand_temp();
 					in1=Exp_translate(s->child[0],&op1);
 					in2=Exp_translate(s->child[2],&op2);
-					c=Intercode_3(op,op1,op2,namemap(s->child[1]->name));
+					c=Intercode_3(*op,op1,op2,namemap(s->child[1]->name));
 					in3=prepare_code(c);
 					in=combine_code(in1,combine_code(in2,in3));
 					break;
@@ -172,20 +175,20 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 					in1=AS_translate(s,&op1,&type);
 					name=generate_name(op1);
 					op2=Operand_st(name);
-					c=Intercode_2(op,op2,IASSIGN);
+					c=Intercode_2(*op,op2,IASSIGN);
 					in2=prepare_code(c);
 					in=combine_code(in1,in2);
 					break;
 			}
 			break;
 		case VLP:
-			in=Exp_translate(s->child[1],&op);//?????
+			in=Exp_translate(s->child[1],op);//?????
 			break;
 		case VMINUS:
 			op1=Operand_temp();
 			in1=Exp_translate(s->child[1],&op1);
 			opc0=Operand_const0();
-			c=Intercode_3(op,opc0,op1,VMINUS);
+			c=Intercode_3(*op,opc0,op1,VMINUS);
 			in2=prepare_code(c);
 			in=combine_code(in1,in2);
 			break;
@@ -194,12 +197,12 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 			op2=Operand_label();
 			opc0=Operand_const0();
 			opc1=Operand_const1();
-			c=Intercode_2(op,opc0,IASSIGN);
+			c=Intercode_2(*op,opc0,IASSIGN);
 			in1=prepare_code(c);
 			in2=Cond_translate(s,op1,op2);
 			c=Intercode_1(op1,ILABEL);
 			in3=prepare_code(c);
-			c=Intercode_2(op,opc1,IASSIGN);
+			c=Intercode_2(*op,opc1,IASSIGN);
 			in4=prepare_code(c);
 			in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 			break;
@@ -207,41 +210,41 @@ Intercodes* Exp_translate(Node *s, Operand *op)
 	return in;
 }
 
-Intercodes* AS_translate(Node *s, Type *type, Operand *op)
+Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 {
 	Intercodes* in=NULL,*in1,*in2,*in3,*in4;
 	Symbolele* symbol;
 	if(namemap(s->child[0]->id_name)==VID){
-		op=Operand_ad(s->child[0]->id_name);
+		*op=Operand_ad(s->child[0]->id_name);
 		symbol=hash_search(s->child[0]->id_name);
-		type=symbol->type;
+		*type=symbol->type;
 	}else if(namemap(s->child[0]->id_name)==VExp){
 		if(namemap(s->child[1]->id_name)==VDOT){
 			Operand *op1;
 			op1=Operand_temp();
-			in1=AS_translate(s->child[0],&type,&op1);
+			in1=AS_translate(s->child[0],&op1,type);
 			FieldList *fi;
-			fi=field_search(s->child[2]->id_name,type);
-			int offset=get_field_offset(s->child[2]->id_name,type);
+			fi=field_search(s->child[2]->id_name,*type);
+			int offset=get_field_offset(s->child[2]->id_name,*type);
 			Operand *op2=Operand_constant(offset);
-			Intercode *c=Intercode_3(op,op1,op2,VPLUS);
+			Intercode *c=Intercode_3(*op,op1,op2,VPLUS);
 			in2=prepare_code(c);
 			in=combine_code(in1,in2);
-			type=fi->s->type;
+			*type=fi->s->type;
 		}else if(namemap(s->child[1]->id_name)==VLB){
 			Operand *op1,*op2,*op3,*op4;
 			op1=Operand_temp();
 			op2=Operand_temp();
 			op3=Operand_temp();
-			in1=AS_translate(s->child[0],&type,&op1);
+			in1=AS_translate(s->child[0],&op1,type);
 			in2=Exp_translate(s->child[2],&op2);
-			int size=get_size(type->array->elem);
+			int size=get_size((*type)->array->elem);
 			op4=Operand_constant(size);
 			Intercode *c=Intercode_3(op3,op2,op4,VSTAR);
 			in3=prepare_code(c);
-			c=Intercode_3(op,op1,op3,VPLUS);
+			c=Intercode_3(*op,op1,op3,VPLUS);
 			in4=prepare_code(c);
-			type=type->array->elem;
+			*type=(*type)->array->elem;
 			in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 		}
 	}
@@ -350,6 +353,6 @@ Intercodes* VarDec_translate(Node *s, Type *type)
 		c=Intercode_dec(s->child[0]->id_name,get_size(symbol->type));	
 		in=prepare_code(c);
 	}	
-	return c;
+	return in;
 }
 

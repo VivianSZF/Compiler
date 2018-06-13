@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-nvar=0;
-ntemp=0;
-nlabel=0;
+int nvar=0,ntemp=0,nlabel=0;
+
 const char* Relop[]={"<","<=","=",">",">=","!="};
 
 Intercodes* combine_code(Intercodes *in1,Intercodes *in2)
@@ -26,7 +25,6 @@ Operands* combine_ops(Operand *op, Operands *ops)
 	ops1->op=op;
 	ops1->pre=NULL;
 	ops1->next=ops;
-	ops->pre=ops1;
 	return ops1;
 }
 

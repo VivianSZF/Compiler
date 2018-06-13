@@ -5,8 +5,7 @@
 #include "../semantic/semantic.h"
 #include "../lexical_syntax/treeop.h"
 
-extern int nvar,ntemp,nlabel;
-
+//extern int nvar,ntemp,nlabel;
 
 Intercodes* combine_code(Intercodes *in1,Intercodes *in2);
 Operands* combine_ops(Operand *op, Operands *ops);
