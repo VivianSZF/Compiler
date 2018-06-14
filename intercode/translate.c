@@ -44,7 +44,7 @@ Intercodes* Args_translate(Node *s, Operands **ops)
 		case 1:
 			op1=Operand_temp();
 			in1=Exp_translate(s->child[0],&op1);
-			*ops=combine_ops(op1,*ops);printf("1\n");
+			*ops=combine_ops(op1,*ops);
 			break;
 		case 2:
 			op1=Operand_temp();
@@ -87,9 +87,9 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 						in=prepare_code(c);
 					}
 					break;	
-				case 4:printf("2\n");
-					in1=Args_translate(s->child[2],&ops);printf("1\n");
-					if(ops==NULL) printf("wronghere\n");
+				case 4:
+					in1=Args_translate(s->child[2],&ops);
+					//if(ops==NULL) printf("wronghere\n");
 					if(strcmp(symbol->name,"write")==0){
 						c=Intercode_1(ops->op,IWRITE);
 						in2=prepare_code(c);
@@ -144,6 +144,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 				case VAND:
 				case VOR:
 				case VRELOP:
+					printf("here\n");
 					op1=Operand_label();
 					op2=Operand_label();
 					opc0=Operand_const0();
@@ -155,6 +156,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					in3=prepare_code(c);
 					c=Intercode_2(*op,opc1,IASSIGN);
 					in4=prepare_code(c);
+					print_Intercodes(in1);
 					in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 					break;
 				case VPLUS:

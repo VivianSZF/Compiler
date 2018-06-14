@@ -520,7 +520,7 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 	switch(namemap(s->child[0]->name)){
 		case VExp:			
 			Exp_analysis(s->child[0]);
-			in=Exp_translate(s->child[0],&op);printf("hre\n");
+			in=Exp_translate(s->child[0],&op);
 			break;
 		case VCompSt:
 			in=CompSt_analysis(s->child[0],NULL);

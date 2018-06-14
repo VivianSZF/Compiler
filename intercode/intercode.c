@@ -1,6 +1,7 @@
 #include "intercode.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int nvar=0,ntemp=0,nlabel=0;
 
@@ -15,8 +16,7 @@ Intercodes* combine_code(Intercodes *in1,Intercodes *in2)
 		p=p->next;
 	}
 	p->next=in2;
-	in2->pre=p;
-	return p;
+	return in1;
 }
 
 Operands* combine_ops(Operand *op, Operands *ops)
@@ -217,8 +217,8 @@ void print_Intercodes(Intercodes *head)
 			printf("LABEL %s :\n",generate_name(c->re));
 		else if(k==IFUNC)
 			printf("FUNCTION %s :\n",generate_name(c->re));
-		else if(k==IASSIGN)
-			printf("%s := %s\n",generate_name(c->re),generate_name(c->op1));
+		else if(k==IASSIGN){if(c->re==NULL) c->re=c->op1;
+			printf("%s := %s\n",generate_name(c->re),generate_name(c->op1));}
 		else if(k==IADD)
 			printf("%s := %s + %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
 		else if(k==ISUB)

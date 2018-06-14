@@ -20,6 +20,10 @@ lab2:
 	cd lexical_syntax && flex lexical.l
 	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c -std=c99 -w -lfl -ly -o parser
 
+lab3:
+	cd lexical_syntax && bison -d -v syntax.y
+	cd lexical_syntax && flex lexical.l
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c -std=c99 -w -lfl -ly -o parser
 
 testc1:
 	./parser test/compulsory/1.cmm
