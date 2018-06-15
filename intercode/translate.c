@@ -178,7 +178,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					break;
 				case VLB:
 				case VDOT:
-					printf("Dothere\n");
 					op1=Operand_temp();	
 					in1=AS_translate(s,&op1,&type);
 					name=generate_name(op1);
