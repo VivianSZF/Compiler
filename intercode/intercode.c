@@ -232,7 +232,7 @@ void print_Intercodes(Intercodes *head)
 		else if(k==IST)
 			printf("%s := *%s\n",generate_name(c->re),generate_name(c->op1));
 		else if(k==IIF)
-			printf("IF %s %s %s GOTO %s\n",generate_name(c->op1),Relop[c->relop],generate_name(c->op2),generate_name(c->re));
+			printf("IF %s %s %s GOTO %s\n",generate_name(c->re),Relop[c->relop],generate_name(c->op1),generate_name(c->op2));
 		else if(k==IRETURN)
 			printf("RETURN %s\n", generate_name(c->re));
 		else if(k==IGOTO)

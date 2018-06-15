@@ -545,10 +545,6 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 				if(error_search(7,s->lineno)==0)
 					printf("Error type 7 at Line %d: Type mismatched for operands.\n",s->lineno);
 			}
-			in3=Stmt_analysis(s->child[4],type);
-			if(s->childnum==7){
-				in6=Stmt_analysis(s->child[6],type);
-			}
 			if(s->childnum==5){
 				label1=Operand_label();
 				label2=Operand_label();
@@ -556,6 +552,7 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 				c=Intercode_1(label1,ILABEL);
 				in2=prepare_code(c);
 				c=Intercode_1(label2,ILABEL);
+				in3=Stmt_analysis(s->child[4],type);
 				in4=prepare_code(c);
 				in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 			}else if(s->childnum==7){
@@ -566,10 +563,12 @@ Intercodes* Stmt_analysis(Node *s,Type *type)
 				c=Intercode_1(label1,ILABEL);
 				in2=prepare_code(c);
 				c=Intercode_1(label3,IGOTO);
+				in3=Stmt_analysis(s->child[4],type);
 				in4=prepare_code(c);
 				c=Intercode_1(label2,ILABEL);
 				in5=prepare_code(c);
 				c=Intercode_1(label3,ILABEL);
+				in6=Stmt_analysis(s->child[6],type);
 				in7=prepare_code(c);
 				in=combine_code(in1,combine_code(in2,combine_code(in3,combine_code(in4,combine_code(in5,combine_code(in6,in7))))));
 			}

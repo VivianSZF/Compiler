@@ -68,13 +68,19 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 	Symbolele *symbol;
 	switch(namemap(s->child[0]->name)){
 		case VINT:
+//			if(*op!=NULL)
+//				free(*op);
+//			printf("time\n");
 			*op=Operand_constant(s->child[0]->int_value);
 			break;
 		case VID:
 			symbol=hash_search(s->child[0]->id_name);
+			printf("%s\n",symbol->name);
 			switch(s->childnum){
 				case 1:
-					*op=Operand_var();
+//					if(*op!=NULL)
+//						free(*op);
+					*op=symbol->op;
 					break;
 				case 3:
 					if(strcmp(symbol->name,"read")==0){
@@ -144,7 +150,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 				case VAND:
 				case VOR:
 				case VRELOP:
-					printf("here\n");
 					op1=Operand_label();
 					op2=Operand_label();
 					opc0=Operand_const0();
@@ -217,6 +222,8 @@ Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 	Intercodes* in=NULL,*in1,*in2,*in3,*in4;
 	Symbolele* symbol;
 	if(namemap(s->child[0]->id_name)==VID){
+//		if(*op!=NULL)
+//			free(*op);
 		*op=Operand_ad(s->child[0]->id_name);
 		symbol=hash_search(s->child[0]->id_name);
 		*type=symbol->type;
