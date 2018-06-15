@@ -43,7 +43,7 @@ Intercodes* Args_translate(Node *s, Operands **ops)
 	switch(s->childnum){
 		case 1:
 			op1=Operand_temp();
-			in1=Exp_translate(s->child[0],&op1);
+			in=Exp_translate(s->child[0],&op1);
 			*ops=combine_ops(op1,*ops);
 			break;
 		case 2:
@@ -75,11 +75,11 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 			break;
 		case VID:
 			symbol=hash_search(s->child[0]->id_name);
-			printf("%s\n",symbol->name);
+//			printf("%s\n",symbol->name);
 			switch(s->childnum){
 				case 1:
-//					if(*op!=NULL)
-//						free(*op);
+					if(*op!=NULL)
+						free(*op);
 					*op=symbol->op;
 					break;
 				case 3:

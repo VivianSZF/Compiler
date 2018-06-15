@@ -58,6 +58,7 @@ Intercode* Intercode_1(Operand *op, int kind)
 
 Intercode* Intercode_2(Operand *op1, Operand *op2, int kind)
 {
+	if(op1==NULL)return NULL;
 	Intercode *c=malloc(sizeof(Intercode));
 	c->kind=kind;
 	c->re=op1;
