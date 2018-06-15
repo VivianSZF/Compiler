@@ -5,7 +5,7 @@
 
 int nvar=0,ntemp=0,nlabel=0;
 
-const char* Relop[]={"<","<=","=",">",">=","!="};
+const char* Relop[]={"<","<=","==",">",">=","!="};
 
 Intercodes* combine_code(Intercodes *in1,Intercodes *in2)
 {
@@ -199,6 +199,8 @@ char* generate_name(Operand *op)
 		sprintf(name,"&%s",op->name);
 	}else if(op->kind==OST){
 		sprintf(name,"*%s",op->name);	
+	}else if(op->kind==ONULL){
+		name=op->name;
 	}
 	return name;	
 }
@@ -239,7 +241,7 @@ void print_Intercodes(Intercodes *head)
 		else if(k==IGOTO)
 			printf("GOTO %s\n",generate_name(c->re));
 		else if(k==IDEC)
-			printf("DEC %s %d\n",generate_name(c->re),generate_name(c->op1));
+			printf("DEC %s %d\n",generate_name(c->re),c->size);
 		else if(k==IARG)
 			printf("ARG %s\n",generate_name(c->re));
 		else if(k==ICALL)

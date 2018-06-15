@@ -1,0 +1,14 @@
+int main()
+{
+	struct Operands
+	{
+		int o1;
+		int o2;
+	}op;
+	int n;
+	op.o1=1;
+	op.o2=2;
+	n=0;
+	write(n);
+	return 0;
+}

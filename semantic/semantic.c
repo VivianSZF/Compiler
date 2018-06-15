@@ -649,6 +649,7 @@ Intercodes* Dec_analysis(Node *s,Type *type,Type *type1)
 			if(error_search(3,symbol->lineno)==0)
 				printf("Error type 3 at Line %d: Redefined variable \"%s\".\n",symbol->lineno,symbol->name);
 		}
+		in=VarDec_translate(s->child[0],type1);	
 	}
 	else{
 		if(field_search(symbol->name,type)==NULL){
@@ -668,8 +669,7 @@ Intercodes* Dec_analysis(Node *s,Type *type,Type *type1)
 			//error 15
 			if(error_search(15,symbol->lineno)==0)
 				printf("Error type 15 at Line %d: Redefined field \"%s\".\n",symbol->lineno,symbol->name);
-		}
-		in=VarDec_translate(s->child[0],type1);
+		}		
 	}
 	if(s->childnum==3)
 	{	

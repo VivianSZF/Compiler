@@ -58,7 +58,7 @@ Intercodes* Args_translate(Node *s, Operands **ops)
 }
 
 Intercodes* Exp_translate(Node *s, Operand **op)
-{
+{	
 	Intercodes *in=NULL,*in1,*in2,*in3,*in4;
 	Intercode *c;
 	Operand *op1=NULL,*op2=NULL,*op3=NULL,*opc0,*opc1;
@@ -178,6 +178,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					break;
 				case VLB:
 				case VDOT:
+					printf("Dothere\n");
 					op1=Operand_temp();	
 					in1=AS_translate(s,&op1,&type);
 					name=generate_name(op1);
@@ -221,14 +222,14 @@ Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 {
 	Intercodes* in=NULL,*in1,*in2,*in3,*in4;
 	Symbolele* symbol;
-	if(namemap(s->child[0]->id_name)==VID){
+	if(namemap(s->child[0]->name)==VID){
 //		if(*op!=NULL)
 //			free(*op);
 		*op=Operand_ad(s->child[0]->id_name);
 		symbol=hash_search(s->child[0]->id_name);
 		*type=symbol->type;
-	}else if(namemap(s->child[0]->id_name)==VExp){
-		if(namemap(s->child[1]->id_name)==VDOT){
+	}else if(namemap(s->child[0]->name)==VExp){
+		if(namemap(s->child[1]->name)==VDOT){
 			Operand *op1;
 			op1=Operand_temp();
 			in1=AS_translate(s->child[0],&op1,type);
@@ -240,7 +241,7 @@ Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 			in2=prepare_code(c);
 			in=combine_code(in1,in2);
 			*type=fi->s->type;
-		}else if(namemap(s->child[1]->id_name)==VLB){
+		}else if(namemap(s->child[1]->name)==VLB){
 			Operand *op1,*op2,*op3,*op4;
 			op1=Operand_temp();
 			op2=Operand_temp();
@@ -335,14 +336,17 @@ int get_size(Type *type)
 
 int get_field_offset(char *name, Type *type)
 {
-	int offset=0;
+	int offset=0;//printf("hereh\n");
+	int mark=0,flag=0;
 	for(FieldList *p=type->structure;p!=NULL;p=p->next){
-		if (strcmp(p->s->name,name)==0) 
-			return offset;
+		if ((strcmp(p->s->name,name)==0)&&flag==0){ 
+			mark=offset;
+			flag=1;
+		}
 		else
 			offset=offset+get_size(p->s->type);
 	}
-	return offset;
+	return offset-mark;
 }
 
 Intercodes* VarDec_translate(Node *s, Type *type)
@@ -361,7 +365,8 @@ Intercodes* VarDec_translate(Node *s, Type *type)
 		symbol=hash_search(s->child[0]->id_name);
 		c=Intercode_dec(s->child[0]->id_name,get_size(symbol->type));	
 		in=prepare_code(c);
-	}	
+	}
+//	if(in!=NULL)printf("yes\n");
 	return in;
 }
 
