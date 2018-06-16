@@ -1,0 +1,26 @@
+FUNCTION main :
+DEC op 8
+DEC r 8
+v3 := #0
+v4 := #0
+LABEL l0 :
+IF v3 < #2 GOTO l1
+GOTO l2
+LABEL l1 :
+t7 := v3 * #4
+t4 := &op + t7
+t14 := v3 * #4
+t11 := &op + t14
+t9 := *t11
+t8 := t9 + #1
+*t4 := t8
+t21 := #0 * #8
+t16 := &r + t21
+t18 := v3 * #4
+t15 := t16 + t18
+*t15 := #5
+t24 := v3 + #1
+v3 := t24
+GOTO l0
+LABEL l2 :
+RETURN #0

@@ -29,7 +29,10 @@ Intercodes* Func_translate(Node *s, Func *func)
 //		Operand *op=malloc(sizeof(Operand));
 //		op->kind=OVAR;
 //		op->name=args->a->name;
-		c1=Intercode_1(args->a->op,IPARAM);
+		if(args->a->type->kind==VTSTRUCT||args->a->type->kind==VTARRAY)
+			c1=Intercode_1(args->a->op,IPARAMAD);
+		else
+			c1=Intercode_1(args->a->op,IPARAM);
 		in3=prepare_code(c1);
 		in2=combine_code(in2,in3);
 	}
@@ -70,8 +73,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 	Symbolele *symbol;
 	switch(namemap(s->child[0]->name)){
 		case VINT:
-//			if(*op!=NULL)
-//				free(*op);
 //			printf("time\n");
 			*op=Operand_constant(s->child[0]->int_value);
 			break;
@@ -165,7 +166,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					in3=prepare_code(c);
 					c=Intercode_2(*op,opc1,IASSIGN);
 					in4=prepare_code(c);
-					print_Intercodes(in1);
 					in=combine_code(in1,combine_code(in2,combine_code(in3,in4)));
 					break;
 				case VPLUS:
@@ -189,11 +189,12 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					c=Intercode_2(*op,op2,IASSIGN);
 					in2=prepare_code(c);
 					in=combine_code(in1,in2);
+
 					break;
 			}
 			break;
 		case VLP:
-			in=Exp_translate(s->child[1],op);//?????
+			in=Exp_translate(s->child[1],op);
 			break;
 		case VMINUS:
 			op1=Operand_temp();
@@ -225,12 +226,13 @@ Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 {
 	Intercodes* in=NULL,*in1,*in2,*in3,*in4;
 	Symbolele* symbol;
-	if(namemap(s->child[0]->name)==VID){
-//		if(*op!=NULL)
-//			free(*op);
-		*op=Operand_ad(s->child[0]->id_name);
+	if(namemap(s->child[0]->name)==VID){	
 		symbol=hash_search(s->child[0]->id_name);
 		*type=symbol->type;
+		if(symbol->type->mainornot==0)
+			*op=Operand_null(s->child[0]->id_name);
+		else
+			*op=Operand_ad(s->child[0]->id_name);
 	}else if(namemap(s->child[0]->name)==VExp){
 		if(namemap(s->child[1]->name)==VDOT){
 			Operand *op1;

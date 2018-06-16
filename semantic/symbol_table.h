@@ -30,6 +30,7 @@ struct Type_
 		}*array;
 		FieldList *structure;
 	};
+	int mainornot;
 };
 
 struct FieldList_

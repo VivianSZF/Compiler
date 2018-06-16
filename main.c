@@ -15,8 +15,8 @@ extern Intercodes *in_head;
 int main(int argc, char** argv){
 	if(argc<=1) return 1;
 	int i;
-	for(i=1;i<argc;i++){
-		FILE *f=fopen(argv[i], "r");
+	for(i=1;i<argc;i=i+2){
+	FILE *f=fopen(argv[i], "r");
 		if(!f){
 			perror(argv[1]);
 			return 1;
@@ -33,7 +33,9 @@ int main(int argc, char** argv){
 		if(errornot==0){
 			//preorderprint(root,0);
 			Program_analysis(root);
-			print_Intercodes(in_head);
+			FILE *f1=fopen(argv[i+1],"w");
+			print_Intercodes(in_head,f1);
+			fclose(f1);
 		}
 		fclose(f);
 	}

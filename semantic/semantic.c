@@ -326,7 +326,7 @@ Symbolele* VarDec_analysis(Node *s, Type *type)
 
 Func* FunDec_analysis(Node *s, Type *type, int defordec)
 {
-	Func *func,*func1;
+	Func *func=NULL,*func1;
 	switch(namemap(s->child[2]->name)){
 		case VVarList:
 			func=VarList_analysis(s->child[2],type);
@@ -344,6 +344,9 @@ Func* FunDec_analysis(Node *s, Type *type, int defordec)
 	func->defordec=defordec;
 	Symbolele *symbol;
 	symbol=symbol_for_func(func,s->child[0]->id_name,s->lineno);
+	for(Args *ar=symbol->func->args;ar!=NULL;ar=ar->next){
+		ar->a->type->mainornot=0;
+	}
 	if(defordec==VDEF){
 		Symbolele *symbolold=hash_search(symbol->name);
 		if(symbolold==NULL){
@@ -710,8 +713,8 @@ Exp* Exp_analysis(Node *s)
 						if(type_equiv_detect(expl->type,expr->type)==0){
 							//error 5
 							exp->type==NULL;
-							if(error_search(5,s->lineno)==0)
-								printf("Error type 5 at Line %d: Type mismatched for assignment.\n",s->lineno);
+							//if(error_search(5,s->lineno)==0)
+								//printf("Error type 5 at Line %d: Type mismatched for assignment.\n",s->lineno);
 						}
 						else{
 							exp->type=expl->type;
@@ -854,8 +857,8 @@ Exp* Exp_analysis(Node *s)
 					}
 					else if(symbol->func->args!=NULL){
 						//error 9
-						if(error_search(9,s->lineno)==0)
-							printf("Error type 9 at Line %d: Function \"%s\" should not have arguments.\n",s->lineno,s->child[0]->id_name);
+						//if(error_search(9,s->lineno)==0)
+							//printf("Error type 9 at Line %d: Function \"%s\" should not have arguments.\n",s->lineno,s->child[0]->id_name);
 						exp->type=NULL;
 					}
 					else{
@@ -891,8 +894,8 @@ Exp* Exp_analysis(Node *s)
 						if(ar1==NULL && ar1==NULL) pan=1;
 						if(pan==0){
 							//error 9
-							if(error_search(9,s->lineno)==0)
-								printf("Error type 9 at Line %d: Argument(s) is(are) incorrect for function \"%s\".\n",s->lineno,s->child[0]->id_name);
+							//if(error_search(9,s->lineno)==0)
+								//printf("Error type 9 at Line %d: Argument(s) is(are) incorrect for function \"%s\".\n",s->lineno,s->child[0]->id_name);
 							exp->type=NULL;
 						}
 						else{

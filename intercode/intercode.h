@@ -4,6 +4,7 @@
 #include "translate.h"
 #include "../semantic/semantic.h"
 #include "../lexical_syntax/treeop.h"
+#include <stdio.h>
 
 //extern int nvar,ntemp,nlabel;
 
@@ -26,7 +27,7 @@ Operand* Operand_st(char *name);
 Operand* Operand_const0();
 Operand* Operand_const1();
 char* generate_name(Operand *op);
-void print_Intercodes(Intercodes *head);
+void print_Intercodes(Intercodes *head,FILE *f);
 
 
 #endif

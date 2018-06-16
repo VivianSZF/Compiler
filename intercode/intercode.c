@@ -191,6 +191,15 @@ Operand* Operand_const1()
 	return op;
 }
 
+Operand* Operand_null(char *name)
+{
+	Operand *op=malloc(sizeof(Operand));
+	op->kind=ONULL;
+	op->name=name;
+	op->adornot=0;
+	return op;
+}
+
 char* generate_name(Operand *op)
 {
 	char *name=malloc(sizeof(char)*20);
@@ -214,7 +223,7 @@ char* generate_name(Operand *op)
 	return name;	
 }
 
-void print_Intercodes(Intercodes *head)
+void print_Intercodes(Intercodes *head, FILE *f)
 {
 	if(head==NULL)
 		return;
@@ -226,45 +235,49 @@ void print_Intercodes(Intercodes *head)
 		c=t->intercode;
 		k=c->kind;
 		if(k==ILABEL)
-			printf("LABEL %s :\n",generate_name(c->re));
+			fprintf(f,"LABEL %s :\n",generate_name(c->re));
 		else if(k==IFUNC)
-			printf("FUNCTION %s :\n",generate_name(c->re));
+			fprintf(f,"FUNCTION %s :\n",generate_name(c->re));
 		else if(k==IASSIGN){if(c->re==NULL) c->re=c->op1;
-			printf("%s := %s\n",generate_name(c->re),generate_name(c->op1));}
+			fprintf(f,"%s := %s\n",generate_name(c->re),generate_name(c->op1));}
 		else if(k==IADD)
-			printf("%s := %s + %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+			fprintf(f,"%s := %s + %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
 		else if(k==ISUB)
-			printf("%s := %s - %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+			fprintf(f,"%s := %s - %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
 		else if(k==IMUL)
-			printf("%s := %s * %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+			fprintf(f,"%s := %s * %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
 		else if(k==IDIV)
-			printf("%s := %s / %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
+			fprintf(f,"%s := %s / %s\n",generate_name(c->re),generate_name(c->op1),generate_name(c->op2));
 		else if(k==IAD)	
-			printf("%s := &%s\n",generate_name(c->re),generate_name(c->op1));
+			fprintf(f,"%s := &%s\n",generate_name(c->re),generate_name(c->op1));
 		else if(k==IST)
-			printf("%s := *%s\n",generate_name(c->re),generate_name(c->op1));
+			fprintf(f,"%s := *%s\n",generate_name(c->re),generate_name(c->op1));
 		else if(k==IIF)
-			printf("IF %s %s %s GOTO %s\n",generate_name(c->re),Relop[c->relop],generate_name(c->op1),generate_name(c->op2));
+			fprintf(f,"IF %s %s %s GOTO %s\n",generate_name(c->re),Relop[c->relop],generate_name(c->op1),generate_name(c->op2));
 		else if(k==IRETURN)
-			printf("RETURN %s\n", generate_name(c->re));
+			fprintf(f,"RETURN %s\n", generate_name(c->re));
 		else if(k==IGOTO)
-			printf("GOTO %s\n",generate_name(c->re));
+			fprintf(f,"GOTO %s\n",generate_name(c->re));
 		else if(k==IDEC)
-			printf("DEC %s %d\n",generate_name(c->re),c->size);
+			fprintf(f,"DEC %s %d\n",generate_name(c->re),c->size);
 		else if(k==IARG)
-			printf("ARG %s\n",generate_name(c->re));
+			fprintf(f,"ARG %s\n",generate_name(c->re));
 		else if(k==ICALL)
-			printf("%s := CALL %s\n",generate_name(c->re),generate_name(c->op1));
+			fprintf(f,"%s := CALL %s\n",generate_name(c->re),generate_name(c->op1));
 		else if(k==IPARAM)
-			printf("PARAM %s\n",generate_name(c->re));
+			fprintf(f,"PARAM %s\n",generate_name(c->re));
 		else if(k==IARGAD){
 			c->re->kind=ONULL;
-			printf("ARG &%s\n",generate_name(c->re));
+			fprintf(f,"ARG &%s\n",generate_name(c->re));
+		}
+		else if(k==IPARAMAD){
+			c->re->kind=ONULL;
+			fprintf(f,"PARAM %s\n",generate_name(c->re));
 		}
 		else if(k==IREAD)
-			printf("READ %s\n",generate_name(c->re));
+			fprintf(f,"READ %s\n",generate_name(c->re));
 		else if(k==IWRITE)
-			printf("WRITE %s\n",generate_name(c->re));
+			fprintf(f,"WRITE %s\n",generate_name(c->re));
 		t=t->next;
 	}	
 }

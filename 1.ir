@@ -1,0 +1,19 @@
+FUNCTION main :
+v1 := #0
+IF v1 > #0 GOTO l0
+GOTO l1
+LABEL l0 :
+WRITE #1
+GOTO l2
+LABEL l1 :
+IF v1 < #0 GOTO l3
+GOTO l4
+LABEL l3 :
+t7 := #0 - #1
+WRITE t7
+GOTO l5
+LABEL l4 :
+WRITE #0
+LABEL l5 :
+LABEL l2 :
+RETURN #0
