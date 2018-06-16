@@ -23,12 +23,13 @@ Intercodes* Func_translate(Node *s, Func *func)
 	Intercodes *in1=prepare_code(c);
 	Intercodes *in2=NULL;
 	Intercodes *in3=NULL;
+	Intercode *c1=NULL;
 	for(Args *args=func->args;args!=NULL;args=args->next){
 		in3=NULL;
-		Operand *op=malloc(sizeof(Operand));
-		op->kind=OVAR;
-		op->name=args->a->name;
-		Intercode *c1=Intercode_1(op,IPARAM);
+//		Operand *op=malloc(sizeof(Operand));
+//		op->kind=OVAR;
+//		op->name=args->a->name;
+		c1=Intercode_1(args->a->op,IPARAM);
 		in3=prepare_code(c1);
 		in2=combine_code(in2,in3);
 	}
@@ -40,13 +41,14 @@ Intercodes* Args_translate(Node *s, Operands **ops)
 {
 	Intercodes *in=NULL,*in1,*in2;
 	Operand *op1=NULL;
+	Symbolele *symbol=NULL;
 	switch(s->childnum){
 		case 1:
 			op1=Operand_temp();
 			in=Exp_translate(s->child[0],&op1);
 			*ops=combine_ops(op1,*ops);
 			break;
-		case 2:
+		case 3:
 			op1=Operand_temp();
 			in1=Exp_translate(s->child[0],&op1);
 			*ops=combine_ops(op1,*ops);
@@ -75,7 +77,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 			break;
 		case VID:
 			symbol=hash_search(s->child[0]->id_name);
-//			printf("%s\n",symbol->name);
+//			printf("%s %d\n",symbol->name,s->childnum);
 			switch(s->childnum){
 				case 1:
 					if(*op!=NULL)
@@ -95,7 +97,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					break;	
 				case 4:
 					in1=Args_translate(s->child[2],&ops);
-					//if(ops==NULL) printf("wronghere\n");
 					if(strcmp(symbol->name,"write")==0){
 						c=Intercode_1(ops->op,IWRITE);
 						in2=prepare_code(c);
@@ -104,7 +105,10 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					else{
 						in2=NULL;
 						for(Operands *opss=ops;opss!=NULL;opss=opss->next){
-							c=Intercode_1(opss->op,IARG);
+							if(opss->op->adornot==1)
+								c=Intercode_1(opss->op,IARGAD);
+							else
+								c=Intercode_1(opss->op,IARG);
 							in3=prepare_code(c);
 							in2=combine_code(in2,in3);
 						}

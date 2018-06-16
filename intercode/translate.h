@@ -14,11 +14,12 @@ struct Operand{
 		int value;
 		char *name;
 	};
+	int adornot;
 	int n;
 };
 
 struct Intercode{
-	enum{ILABEL,IFUNC,IASSIGN,IADD,ISUB,IMUL,IDIV,IAD,IST,IIF,IRETURN,IGOTO,IDEC,IARG,ICALL,IPARAM,IREAD,IWRITE}kind;
+	enum{ILABEL,IFUNC,IASSIGN,IADD,ISUB,IMUL,IDIV,IAD,IST,IIF,IRETURN,IGOTO,IDEC,IARG,ICALL,IPARAM,IARGAD,IREAD,IWRITE}kind;
 	Operand *re,*op1,*op2;
 	int relop,size;	
 };

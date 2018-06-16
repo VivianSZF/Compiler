@@ -112,6 +112,7 @@ Operand* Operand_constant(int value)
 	Operand* op=malloc(sizeof(Operand));
 	op->kind=OCONSTANT;
 	op->value=value;
+	op->adornot=0;
 	return op;
 }
 
@@ -121,6 +122,7 @@ Operand* Operand_var()
 	op->kind=OVAR;
 	op->n=nvar;
 	nvar++;
+	op->adornot=0;
 	return op;
 }
 
@@ -130,6 +132,7 @@ Operand* Operand_temp()
 	op->kind=OTEMP;
 	op->n=ntemp;
 	ntemp++;
+	op->adornot=0;
 	return op;
 }
 
@@ -139,6 +142,7 @@ Operand* Operand_label()
 	op->kind=OLABEL;
 	op->n=nlabel;
 	nlabel++;
+	op->adornot=0;
 	return op;
 }
 
@@ -147,6 +151,7 @@ Operand* Operand_func(char *name)
 	Operand* op=malloc(sizeof(Operand));
 	op->name=name;//????
 	op->kind=OFUNC;
+	op->adornot=0;
 	return op;
 }  
 
@@ -155,6 +160,7 @@ Operand* Operand_ad(char *name)
 	Operand* op=malloc(sizeof(Operand));
 	op->kind=OAD;
 	op->name=name;
+	op->adornot=0;
 	return op;
 }
 
@@ -163,6 +169,7 @@ Operand* Operand_st(char *name)
 	Operand *op=malloc(sizeof(Operand));
 	op->kind=OST;
 	op->name=name;
+	op->adornot=0;
 	return op;
 }
 
@@ -171,6 +178,7 @@ Operand* Operand_const0()
 	Operand *op=malloc(sizeof(Operand));
 	op->kind=OCONSTANT;
 	op->value=0;
+	op->adornot=0;
 	return op;
 }
 
@@ -179,6 +187,7 @@ Operand* Operand_const1()
 	Operand *op=malloc(sizeof(Operand));
 	op->kind=OCONSTANT;
 	op->value=1;
+	op->adornot=0;
 	return op;
 }
 
@@ -248,6 +257,10 @@ void print_Intercodes(Intercodes *head)
 			printf("%s := CALL %s\n",generate_name(c->re),generate_name(c->op1));
 		else if(k==IPARAM)
 			printf("PARAM %s\n",generate_name(c->re));
+		else if(k==IARGAD){
+			c->re->kind=ONULL;
+			printf("ARG &%s\n",generate_name(c->re));
+		}
 		else if(k==IREAD)
 			printf("READ %s\n",generate_name(c->re));
 		else if(k==IWRITE)

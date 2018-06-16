@@ -27,6 +27,10 @@ Symbolele* symbol_for_nonfunc(Type *type, char *name, int lineno)
 	symbol->lineno=lineno;
 	symbol->type=type;
 	symbol->op=Operand_var();
+	if(type->kind==VTARRAY||type->kind==VTSTRUCT){
+		symbol->op->adornot=1;
+		symbol->op->name=symbol->name;
+	}
 	return symbol;
 }
 
