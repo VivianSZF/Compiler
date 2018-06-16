@@ -1,3 +1,8 @@
+int add(int temp[2])
+{
+	return (temp[0]+temp[1]);
+}
+
 int main()
 {
 	int op[2];
@@ -5,9 +10,15 @@ int main()
 	int i=0,j=0;
 	while(i<2)
 	{
-		op[i]=op[i]+1;
-		r[0][i]=5;
-		i=i+1;		
+		while(j<2)
+		{
+			op[j]=i+j;
+			j=j+1;
+	}
+	r[0][i]=add(op);
+	write(r[0][i]);
+	i=i+1;
+	j=0;		
 	}
 	return 0;
 }
