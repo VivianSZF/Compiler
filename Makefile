@@ -40,5 +40,8 @@ testo2:
 testm1:
 	./parser test/my/1.cmm output/m1.ir
 
+testm2:
+	./parser test/my/2.cmm output/m2.ir
+
 testall:
-	./parser test/compulsory/1.cmm output/c1.ir test/compulsory/2.cmm output/c2.ir test/others/1.cmm output/o1.ir test/others/2.cmm output/o2.ir test/my/1.cmm output/m1.ir
+	./parser test/compulsory/1.cmm output/c1.ir test/compulsory/2.cmm output/c2.ir test/others/1.cmm output/o1.ir test/others/2.cmm output/o2.ir test/my/1.cmm output/m1.ir test/my/2.cmm output/m2.ir

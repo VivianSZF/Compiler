@@ -1,6 +1,6 @@
 FUNCTION add :
-PARAM v5
 PARAM temp
+PARAM v5
 t5 := temp + #0
 t3 := *t5
 t7 := temp + #4

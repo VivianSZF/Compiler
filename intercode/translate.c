@@ -24,7 +24,21 @@ Intercodes* Func_translate(Node *s, Func *func)
 	Intercodes *in2=NULL;
 	Intercodes *in3=NULL;
 	Intercode *c1=NULL;
+	Args *neworder=NULL,*tem;
 	for(Args *args=func->args;args!=NULL;args=args->next){
+			Args *newar=malloc(sizeof(Args));
+			newar->a=args->a;
+			if(neworder==NULL){
+				neworder=newar;
+				neworder->next=NULL;
+			}
+			else{
+				tem=neworder;
+				neworder=newar;
+				neworder->next=tem;
+			}
+	}
+	for(Args *args=neworder;args!=NULL;args=args->next){
 		in3=NULL;
 //		Operand *op=malloc(sizeof(Operand));
 //		op->kind=OVAR;

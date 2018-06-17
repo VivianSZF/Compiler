@@ -1,0 +1,43 @@
+struct Position
+{
+	int ad;
+	int ac;
+};
+int add(int a, int b,int c)
+{
+	int t;
+	t=a+b+c;
+	return t;
+}
+
+int addstruct(struct Position p,int w)
+{
+	return (p.ad+p.ac+w);
+}
+
+int addarray(int a[5],int e)
+{
+	return (a[0]+a[1]+e);
+}
+
+int main()
+{
+	int p1,p2,p3,ans1,ans2,ans3;
+	struct Position st;
+	int ar[5];
+	p1=0;
+	p2=read();
+	p3=5;
+	st.ad=3;
+	st.ac=-1;
+	ar[0]=1;
+	ar[1]=2;
+	ar[2]=5;
+	ans1=add(p1,p2,p3);
+	ans2=addstruct(st,p3);
+	ans3=addarray(ar,p3);
+	write(ans1);
+	write(ans2);
+	write(ans3);
+	return 0;
+}
