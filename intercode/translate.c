@@ -81,8 +81,6 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 //			printf("%s %d\n",symbol->name,s->childnum);
 			switch(s->childnum){
 				case 1:
-					if(*op!=NULL)
-						free(*op);
 					*op=symbol->op;
 					break;
 				case 3:
@@ -196,13 +194,20 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 		case VLP:
 			in=Exp_translate(s->child[1],op);
 			break;
-		case VMINUS:
-			op1=Operand_temp();
-			in1=Exp_translate(s->child[1],&op1);
-			opc0=Operand_const0();
-			c=Intercode_3(*op,opc0,op1,VMINUS);
-			in2=prepare_code(c);
-			in=combine_code(in1,in2);
+		case VMINUS:			
+			if(namemap(s->child[1]->child[0]->name)==VINT){
+				int new_value=0-(s->child[1]->child[0]->int_value);
+				op1=Operand_constant(new_value);
+				c=Intercode_2(*op,op1,IASSIGN);
+				in=prepare_code(c);
+			}else{
+				op1=Operand_temp();
+				in1=Exp_translate(s->child[1],&op1);
+				opc0=Operand_const0();
+				c=Intercode_3(*op,opc0,op1,VMINUS);
+				in2=prepare_code(c);
+				in=combine_code(in1,in2);
+			}
 			break;
 		case VNOT:
 			op1=Operand_label();
@@ -341,7 +346,7 @@ int get_size(Type *type)
 
 int get_field_offset(char *name, Type *type)
 {
-	int offset=0;//printf("hereh\n");
+	int offset=0;
 	int mark=0,flag=0;
 	for(FieldList *p=type->structure;p!=NULL;p=p->next){
 		if ((strcmp(p->s->name,name)==0)&&flag==0){ 

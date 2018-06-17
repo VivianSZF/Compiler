@@ -1,16 +1,19 @@
 struct Position
 {
-	int i,j,h;
-	int i=1;
-	int k=3+2+3;
+	int i,j;
+	int h;
+	int t;
 };
-
 int main()
-{
-	int a[10][23];
-	float b[12][23];
+{	
+	int a[10][10];
+	int b[23][12];
 	struct Position p;
-	a[1][1]=b[2][2];
-	p.j=1.0;
-	p.h=1;
+	p.i=3;
+	p.j=10;
+	p.t=2;
+	p.h=3;
+	a[1][1]=3;
+	b[1][1]=3;
+	return 0;
 }
