@@ -16,7 +16,7 @@ int main(int argc, char** argv){
 	if(argc<=1) return 1;
 	int i;
 	for(i=1;i<argc;i=i+2){
-	FILE *f=fopen(argv[i], "r");
+		FILE *f=fopen(argv[i], "r");
 		if(!f){
 			perror(argv[1]);
 			return 1;

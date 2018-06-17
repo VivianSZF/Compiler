@@ -7,7 +7,7 @@
 
 int struct_varassign;
 Intercodes *in_head;
-
+extern int nvar,ntemp,nlabel;
 
 int namemap(char *name)
 {
@@ -108,9 +108,9 @@ void add_write()
 void Program_analysis(Node *root)
 {
 	int i;
-//	nvar=0;
-//	ntemp=0;
-//	nlabel=0;
+	nvar=0;
+	ntemp=0;
+	nlabel=0;
 	memset(errortable,0,sizeof(errortable));
 	struct_varassign=0;
 	for(i=0;i<SIZE;i++)
