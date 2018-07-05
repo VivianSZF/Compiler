@@ -14,8 +14,11 @@ struct Operand{
 		int value;
 		char *name;
 	};
+	Operand *opr;
 	int adornot;
 	int n;
+	int offset;
+	int total;
 };
 
 struct Intercode{

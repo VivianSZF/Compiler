@@ -154,7 +154,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 						op1=Operand_temp();
 						in1=AS_translate(s->child[0],&op1, &type);
 						name=generate_name(op1);
-						op2=Operand_st(name);
+						op2=Operand_st(name,op1);
 						op3=Operand_temp();
 						in2=Exp_translate(s->child[2],&op3);
 						c=Intercode_2(op2,op3,IASSIGN);
@@ -197,7 +197,7 @@ Intercodes* Exp_translate(Node *s, Operand **op)
 					op1=Operand_temp();	
 					in1=AS_translate(s,&op1,&type);
 					name=generate_name(op1);
-					op2=Operand_st(name);
+					op2=Operand_st(name,op1);
 					c=Intercode_2(*op,op2,IASSIGN);
 					in2=prepare_code(c);
 					in=combine_code(in1,in2);
@@ -251,7 +251,7 @@ Intercodes* AS_translate(Node *s, Operand **op, Type **type)
 		if(symbol->type->mainornot==0)
 			*op=Operand_null(s->child[0]->id_name);
 		else
-			*op=Operand_ad(s->child[0]->id_name);
+			*op=Operand_ad(s->child[0]->id_name,symbol->op);
 	}else if(namemap(s->child[0]->name)==VExp){
 		if(namemap(s->child[1]->name)==VDOT){
 			Operand *op1;

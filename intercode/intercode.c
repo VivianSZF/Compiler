@@ -113,6 +113,8 @@ Operand* Operand_constant(int value)
 	op->kind=OCONSTANT;
 	op->value=value;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
@@ -123,6 +125,8 @@ Operand* Operand_var()
 	op->n=nvar;
 	nvar++;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
@@ -133,6 +137,8 @@ Operand* Operand_temp()
 	op->n=ntemp;
 	ntemp++;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
@@ -143,33 +149,43 @@ Operand* Operand_label()
 	op->n=nlabel;
 	nlabel++;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
 Operand* Operand_func(char *name)
 {
 	Operand* op=malloc(sizeof(Operand));
-	op->name=name;//????
+	op->name=name;
 	op->kind=OFUNC;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }  
 
-Operand* Operand_ad(char *name)
+Operand* Operand_ad(char *name,Operand *opr)
 {
 	Operand* op=malloc(sizeof(Operand));
 	op->kind=OAD;
 	op->name=name;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
+	op->opr=opr;
 	return op;
 }
 
-Operand* Operand_st(char *name)
+Operand* Operand_st(char *name,Operand *opr)
 {
 	Operand *op=malloc(sizeof(Operand));
 	op->kind=OST;
 	op->name=name;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
+	op->opr=opr;
 	return op;
 }
 
@@ -179,6 +195,8 @@ Operand* Operand_const0()
 	op->kind=OCONSTANT;
 	op->value=0;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
@@ -188,6 +206,8 @@ Operand* Operand_const1()
 	op->kind=OCONSTANT;
 	op->value=1;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
@@ -197,6 +217,8 @@ Operand* Operand_null(char *name)
 	op->kind=ONULL;
 	op->name=name;
 	op->adornot=0;
+	op->offset=-1;
+	op->total=0;
 	return op;
 }
 
