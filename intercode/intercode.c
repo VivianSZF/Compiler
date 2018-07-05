@@ -16,6 +16,7 @@ Intercodes* combine_code(Intercodes *in1,Intercodes *in2)
 		p=p->next;
 	}
 	p->next=in2;
+	in2->pre=p;
 	return in1;
 }
 

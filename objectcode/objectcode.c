@@ -39,7 +39,6 @@ const char* swd="  sw $t%d, %d($fp)\n";
 REG reg[10];
 
 Operand *sp;
-int args=0;
 
 
 void print_constcode(FILE *f)
@@ -96,11 +95,16 @@ void objectcode(Intercodes *head,FILE *f)
 {
 	print_constcode(f);
 	Intercodes *in=head;
+	int args=0;
+	int params=0;
+	int stsize;
 	while(in!=NULL)
 	{
 		init_reg();
 		Intercode *c=in->intercode;
-		int reg1,reg2,reg3;
+		int reg1,reg2,reg3;		
+		int i;
+		Intercodes *in1=in;
 		switch(c->kind){
 			case ILABEL:
 				fprintf(f,"%s:\n", generate_name(c->re));
@@ -108,11 +112,12 @@ void objectcode(Intercodes *head,FILE *f)
 			case IFUNC:
 				sp=hash_search(c->re->name)->op;
 				sp->total=4;
-				args=0;
+				params=0;
 				fprintf(f,"%s:\n",c->re->name);
 				fprintf(f,"  subu $sp, $sp, %d\n", sp->offset);
 				fprintf(f,"  sw $fp, %d($sp)\n",sp->offset-4);
 				fprintf(f,"  addi $fp, $sp, %d\n",sp->offset);
+				stsize=sp->offset;
 				break;
 			case IASSIGN:
 				opsp_offset(c->re);
@@ -210,8 +215,87 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,"  %s $t%d, $t%d, %s",relopcode[c->relop],reg1,reg2,generate_name(c->op2));//??
 				break;
 			case IRETURN:
-				
+				reg1=reg_select();
+				printforreg(f,reg1,c->re);
+				fprintf(f,"  lw $fp, %d($sp)\n", stsize-4);
+				fprintf(f,"  addi $sp, $sp, %d\n", stsize);
+				fprintf(f,"  move $v0, $t%d\n  jr $ra\n", reg1);
+				break;
+			case IGOTO:
+				fprintf(f,"  j %s\n",generate_name(c->re));
+				break;
+			case IDEC:
+				sp->total=sp->total+c->size;
+				c->re->offset=-sp->total;
+				break;
+			case IARG:
+				args++;
+				break;
+			case ICALL:
+				opsp_offset(c->re);
+				if(args<5){
+					for(i=0;i<args;i++){
+						in1=in1->pre;
+						reg1=reg_select();
+						printforreg(f,reg1,in1->intercode->re);
+						fprintf(f,"  move $a%d, $t%d\n",i,reg1);
+					}
+				}else{
+					fprintf(f,"  addi $sp, $sp, %d\n",-(args-4)*4);
+					for(i=0;i<4;i++){
+						in1=in1->pre;
+						reg1=reg_select();
+						printforreg(f,reg1,in1->intercode->re);
+						fprintf(f,"  move $a%d, $t%d\n",i,reg1);
+					}
+					for(i=4;i<args;i++){
+						in1=in1->pre;
+						reg1=reg_select();
+						printforreg(f,reg1,in1->intercode->re);
+						fprintf(f,"  sw $t%d, %d($sp)\n",reg1,(i-3)*4);
+					}
+				}
+				fprintf(f,"  addi $sp, $sp, -4\n");
+				fprintf(f,"  sw $ra, 0($sp)\n");
+				fprintf(f,"  jal %s\n",c->re->name);
+				fprintf(f,"  lw $ra, 0($sp)\n");
+				fprintf(f,"  addi $sp, $sp, 4\n");
+				if(args>4)
+					fprintf(f,"  addi $sp, $sp, %d\n", (args-4)*4);
+				fprintf(f,"  sw $v0, %d($fp)\n",c->re->offset);
+				args=0;
+				break;
+			case IPARAM:
+				if(params<4){
+					opsp_offset(c->re);
+					fprintf(f,"  sw $a%d, %d($fp)\n",params,c->re->offset);
+				}else{
+					c->re->offset=(params-3)*4;
+					//fprintf(f,"  lw $t")
+				}
+				params++;
+				break;
+			case IREAD:
+				fprintf(f, "  addi $sp, $sp, -4\n");
+				fprintf(f, "  sw $ra, 0($sp)\n");
+				fprintf(f, "  jal read\n");
+				fprintf(f, "  lw $ra, 0($sp)\n");
+				fprintf(f, "  addi $sp, $sp, 4\n");
+				fprintf(f, "  sw $v0, %d($fp)\n", c->re->offset);
+				break;		
+			case IWRITE:
+				if(c->re->kind==OCONSTANT)
+					fprintf(f,"  li $a0, %d\n",c->re->offset);
+				else
+					fprintf(f,"  lw $a0, %d($fp)\n",c->re->offset);
+				fprintf(f, "  addi $sp, $sp, -4\n");
+				fprintf(f, "  sw $ra, 0($sp)\n");
+				fprintf(f, "  jal write\n");
+				fprintf(f, "  lw $ra, 0($sp)\n");
+				fprintf(f, "  addi $sp, $sp, 4\n");
+				break;
 		}
+		in=in->next;
 	}
 }
 
