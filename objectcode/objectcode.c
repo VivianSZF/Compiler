@@ -12,26 +12,26 @@
 #define ST_RA fprintf(f, "  sw $ra, 0($sp)\n");
 #define LD_RA fprintf(f, "  lw $ra, 0($sp)\n");
 
-const char *constcode[]={
-	".data\n",
-	"_prompt: .asciiz \"Enter an integer:\"\n",
-	"_ret: .asciiz \"\\n\"\n",
-	".globl main\n",
-	".text\n",
-	"read:\n",
-	"  li $v0, 4\n",
-	"  la $a0, _prompt\n",
-	"  syscall\n",
-	"  li $v0, 5\n",
-	"  syscall\n",
-	"  jr $ra\n",
-	"write:\n",
-	"  li $v0, 1\n",
-	"  syscall\n",
-	"  li $v0, 4\n",
-	"  la $a0, _ret\n",
-	"  syscall\n",
-	"  move $v0, $0\n",
+const char constcode[]={
+	".data\n"
+	"_prompt: .asciiz \"Enter an integer:\"\n"
+	"_ret: .asciiz \"\\n\"\n"
+	".globl main\n"
+	".text\n"
+	"read:\n"
+	"  li $v0, 4\n"
+	"  la $a0, _prompt\n"
+	"  syscall\n"
+	"  li $v0, 5\n"
+	"  syscall\n"
+	"  jr $ra\n"
+	"write:\n"
+	"  li $v0, 1\n"
+	"  syscall\n"
+	"  li $v0, 4\n"
+	"  la $a0, _ret\n"
+	"  syscall\n"
+	"  move $v0, $0\n"
 	"  jr $ra\n"
 };
 
@@ -97,7 +97,8 @@ void printforreg(FILE *f, int r, Operand *op)
 
 void objectcode(Intercodes *head,FILE *f)
 {
-	print_constcode(f);
+	//print_constcode(f);
+	fprintf(f,constcode);
 	Intercodes *in=head;
 	int args=0;
 	int params=0;
@@ -115,6 +116,11 @@ void objectcode(Intercodes *head,FILE *f)
 				break;
 			case IFUNC:
 				nf=hash_search(c->re->name)->op;
+				if(nf==NULL){
+					nf=Operand_func(c->re->name);
+					nf->offset=0;
+					hash_search(c->re->name)->op=nf;
+				}
 				nf->total=4;
 				params=0;
 				fprintf(f,"\n%s:\n",c->re->name);
@@ -218,7 +224,7 @@ void objectcode(Intercodes *head,FILE *f)
 				reg2=reg_select();
 				printforreg(f,reg1,c->re);
 				printforreg(f,reg2,c->op1);				
-				fprintf(f,"  %s $t%d, $t%d, %s",relopcode[c->relop],reg1,reg2,generate_name(c->op2));//??
+				fprintf(f,"  %s $t%d, $t%d, %s\n",relopcode[c->relop],reg1,reg2,generate_name(c->op2));//??
 				break;
 			case IRETURN:
 				reg1=reg_select();
