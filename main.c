@@ -4,6 +4,7 @@
 #include "semantic/semantic.h"
 #include "intercode/intercode.h"
 #include "intercode/translate.h"
+#include "objectcode/objectcode.h"
 
 extern int errornot;
 extern int mark;
@@ -34,7 +35,8 @@ int main(int argc, char** argv){
 			//preorderprint(root,0);
 			Program_analysis(root);
 			FILE *f1=fopen(argv[i+1],"w");
-			print_Intercodes(in_head,f1);
+			//print_Intercodes(in_head,f1);
+			objectcode(in_head,f1);
 			fclose(f1);
 		}
 		fclose(f);

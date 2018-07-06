@@ -5,7 +5,7 @@ syntax:
 	cd lexical_syntax && bison -d -v syntax.y
 
 parser:
-	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c -std=c99 -w -lfl -ly -o parser
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c objectcode/objectcode.c -std=c99 -w -lfl -ly -o parser
 
 clean:
 	rm -f parser
@@ -24,6 +24,11 @@ lab3:
 	cd lexical_syntax && bison -d -v syntax.y
 	cd lexical_syntax && flex lexical.l
 	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c -std=c99 -w -lfl -ly -o parser
+
+lab4:
+	cd lexical_syntax && bison -d -v syntax.y
+	cd lexical_syntax && flex lexical.l
+	gcc main.c lexical_syntax/syntax.tab.c lexical_syntax/treeop.c semantic/symbol_table.c semantic/semantic.c intercode/intercode.c intercode/translate.c objectcode/objectcode.c -std=c99 -w -lfl -ly -o parser
 
 testc1:
 	./parser test/compulsory/1.cmm output/c1.ir

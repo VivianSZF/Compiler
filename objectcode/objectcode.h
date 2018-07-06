@@ -8,4 +8,6 @@ struct REG{
 	int useornot;
 };
 
+void objectcode(Intercodes *head,FILE *f);
+
 #endif
