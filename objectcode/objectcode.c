@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SUB_SP fprintf(f, "  addi $sp, $sp, -4\n");
+#define ADD_SP fprintf(f, "  addi $sp, $sp, 4\n");
+#define ST_RA fprintf(f, "  sw $ra, 0($sp)\n");
+#define LD_RA fprintf(f, "  lw $ra, 0($sp)\n");
+
 const char *constcode[]={
 	".data\n",
 	"_prompt: .asciiz \"Enter an integer:\"\n",
@@ -34,12 +39,11 @@ const char* relopcode[]={
 	"blt","ble","beq","bgt","bge","bne"
 };
 
-const char* swd="  sw $t%d, %d($fp)\n";
+const char *swd="  sw $t%d, %d($fp)\n";
 
 REG reg[10];
 
-Operand *sp;
-
+Operand *nf;//the newest function
 
 void print_constcode(FILE *f)
 {
@@ -53,8 +57,8 @@ void print_constcode(FILE *f)
 void opsp_offset(Operand *op)
 {
 	if(op->offset==-1&&(op->kind==OVAR||op->kind==OTEMP)){
-		sp->total=sp->total+4;
-		op->offset=-sp->total;
+		nf->total=nf->total+4;
+		op->offset=-nf->total;
 	}
 }
 
@@ -74,10 +78,10 @@ int reg_select()
 			return i;
 		}
 	}
-	return -1;//???
+	return -1;//args>10
 }
 
-//print reg operation for op
+//print loading reg operation for op
 void printforreg(FILE *f, int r, Operand *op)
 {
 	if(op->kind==OCONSTANT){
@@ -110,14 +114,14 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,"%s:\n", generate_name(c->re));
 				break;
 			case IFUNC:
-				sp=hash_search(c->re->name)->op;
-				sp->total=4;
+				nf=hash_search(c->re->name)->op;
+				nf->total=4;
 				params=0;
-				fprintf(f,"%s:\n",c->re->name);
-				fprintf(f,"  subu $sp, $sp, %d\n", sp->offset);
-				fprintf(f,"  sw $fp, %d($sp)\n",sp->offset-4);
-				fprintf(f,"  addi $fp, $sp, %d\n",sp->offset);
-				stsize=sp->offset;
+				fprintf(f,"\n%s:\n",c->re->name);
+				fprintf(f,"  subu $sp, $sp, %d\n", nf->offset);
+				fprintf(f,"  sw $fp, %d($sp)\n",nf->offset-4);
+				fprintf(f,"  addi $fp, $sp, %d\n",nf->offset);
+				stsize=nf->offset;
 				break;
 			case IASSIGN:
 				opsp_offset(c->re);
@@ -126,17 +130,19 @@ void objectcode(Intercodes *head,FILE *f)
 					reg1=reg_select();
 					reg2=reg_select();
 					printforreg(f,reg1,c->re);
+					printforreg(f,reg2,c->op1);
 					fprintf(f,"  sw $t%d, 0($t%d)\n",reg2,reg1);
 				}else if(c->op1->kind==OST){
 					reg1=reg_select();
 					reg2=reg_select();
+					printforreg(f,reg1,c->re);
 					printforreg(f,reg2,c->op1);
 					fprintf(f,"  lw $t%d, 0($t%d)\n",reg1,reg2);
 					fprintf(f,swd,reg1,c->re->offset);
 				}else{
 					reg1=reg_select();
 					printforreg(f,reg1,c->op1);
-					fprintf(f,swd,reg1,c->re);
+					fprintf(f,swd,reg1,c->re->offset);
 				}			
 				break;
 			case IADD:
@@ -225,8 +231,8 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,"  j %s\n",generate_name(c->re));
 				break;
 			case IDEC:
-				sp->total=sp->total+c->size;
-				c->re->offset=-sp->total;
+				nf->total=nf->total+c->size;
+				c->re->offset=-nf->total;
 				break;
 			case IARG:
 				args++;
@@ -255,11 +261,11 @@ void objectcode(Intercodes *head,FILE *f)
 						fprintf(f,"  sw $t%d, %d($sp)\n",reg1,(i-3)*4);
 					}
 				}
-				fprintf(f,"  addi $sp, $sp, -4\n");
-				fprintf(f,"  sw $ra, 0($sp)\n");
+				SUB_SP;
+				ST_RA;
 				fprintf(f,"  jal %s\n",c->re->name);
-				fprintf(f,"  lw $ra, 0($sp)\n");
-				fprintf(f,"  addi $sp, $sp, 4\n");
+				LD_RA;
+				ADD_SP;
 				if(args>4)
 					fprintf(f,"  addi $sp, $sp, %d\n", (args-4)*4);
 				fprintf(f,"  sw $v0, %d($fp)\n",c->re->offset);
@@ -276,11 +282,11 @@ void objectcode(Intercodes *head,FILE *f)
 				params++;
 				break;
 			case IREAD:
-				fprintf(f, "  addi $sp, $sp, -4\n");
-				fprintf(f, "  sw $ra, 0($sp)\n");
+				SUB_SP;
+				ST_RA;
 				fprintf(f, "  jal read\n");
-				fprintf(f, "  lw $ra, 0($sp)\n");
-				fprintf(f, "  addi $sp, $sp, 4\n");
+				LD_RA;
+				ADD_SP;
 				fprintf(f, "  sw $v0, %d($fp)\n", c->re->offset);
 				break;		
 			case IWRITE:
@@ -288,11 +294,11 @@ void objectcode(Intercodes *head,FILE *f)
 					fprintf(f,"  li $a0, %d\n",c->re->offset);
 				else
 					fprintf(f,"  lw $a0, %d($fp)\n",c->re->offset);
-				fprintf(f, "  addi $sp, $sp, -4\n");
-				fprintf(f, "  sw $ra, 0($sp)\n");
+				SUB_SP;
+				ST_RA;
 				fprintf(f, "  jal write\n");
-				fprintf(f, "  lw $ra, 0($sp)\n");
-				fprintf(f, "  addi $sp, $sp, 4\n");
+				LD_RA;
+				ADD_SP;
 				break;
 		}
 		in=in->next;
