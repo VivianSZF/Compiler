@@ -1,19 +1,18 @@
-struct Position
+int Add(int a, int b, int c)
 {
-	int i,j;
-	int h;
-	int t;
-};
+	if(a>b)
+		return a-b;
+	if(a>c)
+		return a-c;
+	return c;
+}
 int main()
 {	
-	int a[10][10];
-	int b[23][12];
-	struct Position p;
-	p.i=3;
-	p.j=10;
-	p.t=2;
-	p.h=3;
-	a[1][1]=3;
-	b[1][1]=3;
+	int i,j,k,n;
+	i=read();
+	j=read();
+	k=read();
+	n=Add(i,j,k);
+	write(n);
 	return 0;
 }

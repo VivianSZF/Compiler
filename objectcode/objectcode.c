@@ -287,7 +287,7 @@ void objectcode(Intercodes *head,FILE *f)
 						in1=in1->pre;
 						reg1=reg_select();
 						printforreg(f,reg1,in1->intercode->re);
-						fprintf(f,"  sw $t%d, %d($sp)\n",reg1,(i-3)*4);
+						fprintf(f,"  sw $t%d, %d($sp)\n",reg1,(i-4)*4);
 					}
 				}
 				SUB_SP;
