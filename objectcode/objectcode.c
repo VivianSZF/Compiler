@@ -45,14 +45,6 @@ REG reg[10];
 
 Operand *nf;//the newest function
 
-void print_constcode(FILE *f)
-{
-	int i;
-	for(i=0;i<20;i++);
-		fprintf(f,"%s",constcode[i]);
-}
-
-
 //array
 void opsp_offset(Operand *op)
 {
@@ -269,7 +261,7 @@ void objectcode(Intercodes *head,FILE *f)
 				}
 				SUB_SP;
 				ST_RA;
-				fprintf(f,"  jal %s\n",c->re->name);
+				fprintf(f,"  jal %s\n",c->op1->name);
 				LD_RA;
 				ADD_SP;
 				if(args>4)
@@ -288,6 +280,7 @@ void objectcode(Intercodes *head,FILE *f)
 				params++;
 				break;
 			case IREAD:
+				opsp_offset(c->re);
 				SUB_SP;
 				ST_RA;
 				fprintf(f, "  jal read\n");
