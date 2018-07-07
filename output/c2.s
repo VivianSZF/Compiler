@@ -20,9 +20,9 @@ write:
   jr $ra
 
 fact:
-  subu $sp, $sp, 0
   sw $fp, -4($sp)
-  addi $fp, $sp, 0
+  move $fp, $sp
+  addi $sp, $sp, -20
   sw $a0, -8($fp)
   lw $t0, -8($fp)
   li $t1, 1
@@ -30,10 +30,11 @@ fact:
   j l1
 l0:
   lw $t0, -8($fp)
+  addi $sp, $sp, 20
   lw $fp, -4($sp)
-  addi $sp, $sp, 0
   move $v0, $t0
   jr $ra
+
   j l2
 l1:
   lw $t0, -12($fp)
@@ -54,16 +55,17 @@ l1:
   mul $t0, $t1, $t2
   sw $t0, -20($fp)
   lw $t0, -20($fp)
+  addi $sp, $sp, 20
   lw $fp, -4($sp)
-  addi $sp, $sp, 0
   move $v0, $t0
   jr $ra
+
 l2:
 
 main:
-  subu $sp, $sp, 0
   sw $fp, -4($sp)
-  addi $fp, $sp, 0
+  move $fp, $sp
+  addi $sp, $sp, -20
   addi $sp, $sp, -4
   sw $ra, 0($sp)
   jal read
@@ -99,7 +101,8 @@ l5:
   lw $ra, 0($sp)
   addi $sp, $sp, 4
   li $t0, 0
+  addi $sp, $sp, 20
   lw $fp, -4($sp)
-  addi $sp, $sp, 0
   move $v0, $t0
   jr $ra
+

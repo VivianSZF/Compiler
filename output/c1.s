@@ -20,9 +20,9 @@ write:
   jr $ra
 
 main:
-  subu $sp, $sp, 0
   sw $fp, -4($sp)
-  addi $fp, $sp, 0
+  move $fp, $sp
+  addi $sp, $sp, -36
   li $t0, 0
   sw $t0, -8($fp)
   li $t0, 1
@@ -69,7 +69,8 @@ l1:
   j l0
 l2:
   li $t0, 0
+  addi $sp, $sp, 36
   lw $fp, -4($sp)
-  addi $sp, $sp, 0
   move $v0, $t0
   jr $ra
+

@@ -45,10 +45,10 @@ REG reg[10];
 
 Operand *nf;//the newest function
 
-//array
+
 void opsp_offset(Operand *op)
 {
-	if(op->offset==-1&&(op->kind==OVAR||op->kind==OTEMP)){
+	if(op->offset==-1){
 		nf->total=nf->total+4;
 		op->offset=-nf->total;
 	}
@@ -70,7 +70,7 @@ int reg_select()
 			return i;
 		}
 	}
-	return -1;//args>10
+	return -1;
 }
 
 //print loading reg operation for op
@@ -87,14 +87,68 @@ void printforreg(FILE *f, int r, Operand *op)
 	}
 }
 
+void compute_offset(Intercodes *head)
+{
+	Intercodes *in=head;
+	int params=0;
+	while(in!=NULL)
+	{	
+		Intercode *c=in->intercode;
+		switch(c->kind){
+			case IFUNC:
+				nf=hash_search(generate_name(c->re))->op;
+				if(nf==NULL){
+					nf=Operand_func(c->re->name);
+					nf->offset=0;
+					hash_search(c->re->name)->op=nf;
+				}
+				nf->total=4;
+				params=0;
+				break;
+			case IASSIGN:
+				opsp_offset(c->re);
+				if(c->op1->kind!=OCONSTANT)
+					opsp_offset(c->op1);
+				break;
+			case IADD:
+			case ISUB:
+			case IMUL:
+			case IDIV:
+				opsp_offset(c->re);
+				if(c->op1->kind!=OCONSTANT) opsp_offset(c->op1);
+				if(c->op2->kind!=OCONSTANT) opsp_offset(c->op2);
+				break;
+			case ICALL:
+				opsp_offset(c->re);
+				break;
+			case IDEC:
+				nf->total=nf->total+c->size;
+				c->re->offset=-nf->total;
+				break;
+			case IPARAM:
+				if(params<4){
+					opsp_offset(c->re);
+				}else{
+					c->re->offset=(params-3)*4;
+				}
+				params++;
+				break;
+			case IREAD:
+				opsp_offset(c->re);
+				break;
+			
+		}
+		in=in->next;
+	}
+}
+
 void objectcode(Intercodes *head,FILE *f)
 {
-	//print_constcode(f);
+	compute_offset(head);
 	fprintf(f,constcode);
 	Intercodes *in=head;
 	int args=0;
 	int params=0;
-	int stsize;
 	while(in!=NULL)
 	{
 		init_reg();
@@ -107,23 +161,14 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,"%s:\n", generate_name(c->re));
 				break;
 			case IFUNC:
-				nf=hash_search(c->re->name)->op;
-				if(nf==NULL){
-					nf=Operand_func(c->re->name);
-					nf->offset=0;
-					hash_search(c->re->name)->op=nf;
-				}
-				nf->total=4;
 				params=0;
-				fprintf(f,"\n%s:\n",c->re->name);
-				fprintf(f,"  subu $sp, $sp, %d\n", nf->offset);
-				fprintf(f,"  sw $fp, %d($sp)\n",nf->offset-4);
-				fprintf(f,"  addi $fp, $sp, %d\n",nf->offset);
-				stsize=nf->offset;
+				nf=hash_search(generate_name(c->re))->op;
+				fprintf(f,"\n%s:\n",generate_name(c->re));
+				fprintf(f,"  sw $fp, -4($sp)\n");
+				fprintf(f,"  move $fp, $sp\n");
+				fprintf(f,"  addi $sp, $sp, %d\n", -nf->total);
 				break;
 			case IASSIGN:
-				opsp_offset(c->re);
-				opsp_offset(c->op1);
 				if(c->re->kind==OST){
 					reg1=reg_select();
 					reg2=reg_select();
@@ -143,10 +188,7 @@ void objectcode(Intercodes *head,FILE *f)
 					fprintf(f,swd,reg1,c->re->offset);
 				}			
 				break;
-			case IADD:
-				opsp_offset(c->re);
-				opsp_offset(c->op1);
-				opsp_offset(c->op2);	
+			case IADD:	
 				if(c->op2->kind==OCONSTANT){
 					reg1=reg_select();
 					reg2=reg_select();
@@ -164,10 +206,7 @@ void objectcode(Intercodes *head,FILE *f)
 				}	
 				fprintf(f,swd,reg1,c->re->offset);
 				break;
-			case ISUB:
-				opsp_offset(c->re);
-				opsp_offset(c->op1);
-				opsp_offset(c->op2);	
+			case ISUB:	
 				if(c->op2->kind==OCONSTANT){
 					reg1=reg_select();
 					reg2=reg_select();
@@ -186,9 +225,6 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,swd,reg1,c->re->offset);
 				break;	
 			case IMUL:
-				opsp_offset(c->re);
-				opsp_offset(c->op1);
-				opsp_offset(c->op2);
 				reg1=reg_select();
 				reg2=reg_select();
 				reg3=reg_select();
@@ -199,9 +235,6 @@ void objectcode(Intercodes *head,FILE *f)
 				fprintf(f,swd,reg1,c->re->offset);
 				break;
 			case IDIV:
-				opsp_offset(c->re);
-				opsp_offset(c->op1);
-				opsp_offset(c->op2);
 				reg1=reg_select();
 				reg2=reg_select();
 				reg3=reg_select();
@@ -216,27 +249,25 @@ void objectcode(Intercodes *head,FILE *f)
 				reg2=reg_select();
 				printforreg(f,reg1,c->re);
 				printforreg(f,reg2,c->op1);				
-				fprintf(f,"  %s $t%d, $t%d, %s\n",relopcode[c->relop],reg1,reg2,generate_name(c->op2));//??
+				fprintf(f,"  %s $t%d, $t%d, %s\n",relopcode[c->relop],reg1,reg2,generate_name(c->op2));
 				break;
 			case IRETURN:
 				reg1=reg_select();
 				printforreg(f,reg1,c->re);
-				fprintf(f,"  lw $fp, %d($sp)\n", stsize-4);
-				fprintf(f,"  addi $sp, $sp, %d\n", stsize);
-				fprintf(f,"  move $v0, $t%d\n  jr $ra\n", reg1);
+				fprintf(f,"  addi $sp, $sp, %d\n", nf->total);
+				fprintf(f,"  lw $fp, -4($sp)\n");
+				fprintf(f,"  move $v0, $t%d\n", reg1);
+				fprintf(f,"  jr $ra\n\n");
 				break;
 			case IGOTO:
 				fprintf(f,"  j %s\n",generate_name(c->re));
 				break;
 			case IDEC:
-				nf->total=nf->total+c->size;
-				c->re->offset=-nf->total;
 				break;
 			case IARG:
 				args++;
 				break;
 			case ICALL:
-				opsp_offset(c->re);
 				if(args<5){
 					for(i=0;i<args;i++){
 						in1=in1->pre;
@@ -271,16 +302,15 @@ void objectcode(Intercodes *head,FILE *f)
 				break;
 			case IPARAM:
 				if(params<4){
-					opsp_offset(c->re);
 					fprintf(f,"  sw $a%d, %d($fp)\n",params,c->re->offset);
-				}else{
-					c->re->offset=(params-3)*4;
-					//fprintf(f,"  lw $t")
 				}
+				///else{
+				
+					//fprintf(f,"  lw $t")
+				//}
 				params++;
 				break;
 			case IREAD:
-				opsp_offset(c->re);
 				SUB_SP;
 				ST_RA;
 				fprintf(f, "  jal read\n");
