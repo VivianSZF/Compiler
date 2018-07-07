@@ -70,7 +70,10 @@ int reg_select()
 			return i;
 		}
 	}
-	return -1;
+	for(i=4;i<8;i++){
+		reg[i].useornot=0;
+	}
+	return 3;
 }
 
 //print loading reg operation for op
